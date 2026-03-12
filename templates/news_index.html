@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% block title %}新闻动态{% if cat %} - {{ dict(categories).get(cat, '') }}{% endif %} - 屈氏宗谱{% endblock %}
+{% block meta_description %}屈氏新闻动态：宗亲活动、历史事件、文化研究、平台公告。{% endblock %}
+{% block content %}
+
+<div class="text-center mb-4">
+    <p class="heritage-subtitle mb-3">追昔抚今 · 记录传承</p>
+    <h1 class="display-5 mb-2" style="letter-spacing:0.08em">新闻动态</h1>
+    <p class="lead text-muted mb-0">宗亲活动 · 历史事件 · 文化研究 · 平台公告</p>
+    <div class="heritage-divider"></div>
+</div>
+
+{# 搜索栏 #}
+<div class="wiki-search-bar mb-4">
+    <form method="get" class="d-flex gap-2">
+        {% if cat %}<input type="hidden" name="cat" value="{{ cat }}">{% endif %}
+        <input type="text" name="q" class="form-control" placeholder="搜索新闻…" value="{{ q }}" autocomplete="off">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i></button>
+    </form>
+</div>
+
+{# 分类标签 #}
+<div class="wiki-cat-tabs mb-4">
+    <a href="{{ url_for('news.index', q=q) }}" class="wiki-cat-tab {% if not cat %}active{% endif %}">
+        全部 <span class="wiki-cat-count">{{ articles.total }}</span>
+    </a>
+    {% for code, label in categories %}
+    {% if cat_counts[code] > 0 %}
+    <a href="{{ url_for('news.index', cat=code, q=q) }}" class="wiki-cat-tab {% if cat == code %}active{% endif %}">
+        {{ label }} <span class="wiki-cat-count">{{ cat_counts[code] }}</span>
+    </a>
+    {% endif %}
+    {% endfor %}
+</div>
+
+{% if q and articles.total == 0 %}
+<div class="text-center py-5">
+    <i class="bi bi-search display-4 text-muted"></i>
+    <p class="mt-3 text-muted">未找到与"{{ q }}"相关的新闻</p>
+    <a href="{{ url_for('news.index') }}" class="btn btn-outline-primary btn-sm mt-2">查看全部新闻</a>
+</div>
+{% elif articles.total == 0 %}
+<div class="text-center py-5">
+    <i class="bi bi-newspaper display-4 text-muted"></i>
+    <p class="mt-3 text-muted">暂无新闻动态</p>
+    {% if is_logged_in %}
+    <a href="{{ url_for('news.admin_add') }}" class="btn btn-primary btn-sm mt-2"><i class="bi bi-plus-circle me-1"></i>发布新闻</a>
+    {% endif %}
+</div>
+{% else %}
+
+<div class="news-list">
+    {% for art in articles.items %}
+    <a href="{{ url_for('news.detail', slug=art.slug) }}" class="news-list-item {% if art.is_pinned %}news-pinned{% endif %}">
+        <div class="news-list-date">
+            {% if art.event_date %}
+            <span class="news-date-main">{{ art.event_date }}</span>
+            {% else %}
+            <span class="news-date-main">{{ art.create_time.strftime('%m-%d') }}</span>
+            <span class="news-date-year">{{ art.create_time.strftime('%Y') }}</span>
+            {% endif %}
+        </div>
+        <div class="news-list-body">
+            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                {% if art.is_pinned %}<span class="badge bg-danger">置顶</span>{% endif %}
+                <span class="news-list-cat">{{ art.category_label }}</span>
+            </div>
+            <h5 class="news-list-title">{{ art.title }}</h5>
+            {% if art.summary %}
+            <p class="news-list-summary">{{ art.summary[:120] }}{% if art.summary|length > 120 %}…{% endif %}</p>
+            {% endif %}
+            {% if art.source %}
+            <small class="text-muted"><i class="bi bi-link-45deg me-1"></i>{{ art.source }}</small>
+            {% endif %}
+        </div>
+        <div class="news-list-arrow"><i class="bi bi-chevron-right"></i></div>
+    </a>
+    {% endfor %}
+</div>
+
+{# 分页 #}
+{% if articles.pages > 1 %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        <li class="page-item {% if not articles.has_prev %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('news.index', page=articles.prev_num, cat=cat, q=q) }}">上一页</a>
+        </li>
+        {% for p in articles.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if p %}
+        <li class="page-item {% if p == articles.page %}active{% endif %}">
+            <a class="page-link" href="{{ url_for('news.index', page=p, cat=cat, q=q) }}">{{ p }}</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">…</span></li>
+        {% endif %}
+        {% endfor %}
+        <li class="page-item {% if not articles.has_next %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('news.index', page=articles.next_num, cat=cat, q=q) }}">下一页</a>
+        </li>
+    </ul>
+</nav>
+{% endif %}
+
+{% endif %}
+
+{% if is_logged_in %}
+<div class="text-center mt-4">
+    <a href="{{ url_for('news.admin_list') }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-gear me-1"></i>管理新闻</a>
+</div>
+{% endif %}
+
+{% endblock %}

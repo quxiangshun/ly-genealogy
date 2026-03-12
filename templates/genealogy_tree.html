@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}{{ genealogy.genealogy_name }} 族谱树 - 屈氏宗谱{% endblock %}
+{% block content %}
+<h2>{{ genealogy.genealogy_name }} 族谱结构</h2>
+<p class="text-muted">{% if genealogy.region or genealogy.period %}{{ genealogy.region or '' }}{% if genealogy.region and genealogy.period %} · {% endif %}{{ genealogy.period or '' }}。{% endif %}共 {{ members|length }} 位成员。点击姓名可查看其亲属关系。</p>
+
+<div class="mb-4">
+    <a href="{{ url_for('genealogy.list_genealogies') }}" class="btn btn-outline-secondary">返回族谱列表</a>
+    <a href="{{ url_for('member.list_members', genealogy_id=genealogy.id) }}" class="btn btn-outline-primary">成员管理</a>
+</div>
+
+{% if genealogy.generations %}
+<div class="card mb-4">
+    <div class="card-header">字辈</div>
+    <div class="card-body">
+        <p class="mb-0">{% for gen in genealogy.generations %}<span class="me-2">{{ gen.character }}{% if gen.note %}<small class="text-muted">({{ gen.note }})</small>{% endif %}</span>{% endfor %}</p>
+    </div>
+</div>
+{% endif %}
+
+<div class="card">
+    <div class="card-body">
+        <ul class="list-group list-group-flush">
+            {% for m in members %}
+            <li class="list-group-item">
+                <a href="{{ url_for('query.member_detail', member_id=m.id) }}">{{ m.name | mask_name }}</a>
+                {% if m.generation_number %}<span class="badge" style="background:rgba(176,138,80,0.15);color:var(--heritage-accent);font-size:0.75rem">{{ m.generation_number }}世</span>{% endif %}
+                {% if m.courtesy_name %}<span class="text-muted small">{{ m.courtesy_name }}</span>{% endif %}
+                <span class="text-muted">（{{ '男' if m.gender == 'M' else '女' }}{% if m.birth_date %}，{{ m.birth_date.year }}年生{% endif %}）</span>
+                {% if m.father or m.mother %}
+                <span class="text-muted small"> — 父：{{ (m.father.name | mask_name) if m.father else '?' }}；母：{{ (m.mother.name | mask_name) if m.mother else '?' }}</span>
+                {% endif %}
+            </li>
+            {% else %}
+            <li class="list-group-item text-muted">该族谱下暂无成员。</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

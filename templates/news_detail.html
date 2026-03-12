@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}{{ article.title }} - 新闻动态 - 屈氏宗谱{% endblock %}
+{% block meta_description %}{{ article.summary or article.title }}{% endblock %}
+{% block content %}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb" style="font-size:.9rem">
+        <li class="breadcrumb-item"><a href="{{ url_for('index') }}">首页</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('news.index') }}">新闻动态</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('news.index', cat=article.category) }}">{{ article.category_label }}</a></li>
+        <li class="breadcrumb-item active">{{ article.title }}</li>
+    </ol>
+</nav>
+
+<article class="wiki-article">
+    <header class="wiki-article-header mb-4">
+        <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+            <span class="wiki-card-cat">{{ article.category_label }}</span>
+            {% if article.event_date %}<span class="wiki-card-era">{{ article.event_date }}</span>{% endif %}
+            {% if article.is_pinned %}<span class="badge bg-danger">置顶</span>{% endif %}
+        </div>
+        <h1 class="wiki-article-title">{{ article.title }}</h1>
+        {% if article.summary %}
+        <p class="wiki-article-summary">{{ article.summary }}</p>
+        {% endif %}
+        <div class="wiki-article-meta">
+            <span><i class="bi bi-clock me-1"></i>{{ article.create_time.strftime('%Y-%m-%d %H:%M') }}</span>
+            {% if article.source %}<span><i class="bi bi-link-45deg me-1"></i>来源：{{ article.source }}</span>{% endif %}
+        </div>
+    </header>
+
+    <div class="wiki-article-body">
+        {{ article.content | safe }}
+    </div>
+
+    {% if is_logged_in %}
+    <div class="mt-4">
+        <a href="{{ url_for('news.admin_edit', article_id=article.id) }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil me-1"></i>编辑此新闻</a>
+    </div>
+    {% endif %}
+</article>
+
+{# 上一篇/下一篇 #}
+<div class="news-nav-footer mt-5">
+    <div class="row g-3">
+        <div class="col-6">
+            {% if prev_art %}
+            <a href="{{ url_for('news.detail', slug=prev_art.slug) }}" class="news-nav-link">
+                <small class="text-muted"><i class="bi bi-chevron-left me-1"></i>上一篇</small>
+                <span>{{ prev_art.title }}</span>
+            </a>
+            {% endif %}
+        </div>
+        <div class="col-6 text-end">
+            {% if next_art %}
+            <a href="{{ url_for('news.detail', slug=next_art.slug) }}" class="news-nav-link text-end">
+                <small class="text-muted">下一篇<i class="bi bi-chevron-right ms-1"></i></small>
+                <span>{{ next_art.title }}</span>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

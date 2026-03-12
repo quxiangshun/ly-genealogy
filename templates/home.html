@@ -1,0 +1,345 @@
+{% extends 'base.html' %}
+{% block title %}首页 - 屈氏宗谱{% endblock %}
+{% block meta_description %}屈氏宗谱官网：屈氏宗亲族谱与文化传承，按地区年代检索屈氏族谱，字辈表、成员查询、世系树，屈氏文化。{% endblock %}
+{% block content %}
+
+{# ===== Hero 区 ===== #}
+<div class="hero-section">
+    <p class="heritage-subtitle mb-3">慎终追远 · 民德归厚</p>
+    <h1 class="display-5 mb-2">屈氏宗谱</h1>
+    <p class="lead text-muted mb-0">屈氏宗亲族谱与文化传承</p>
+    <p class="text-muted small mb-0">按地区、年代检索屈氏族谱 · 字辈表 · 世系树 · 成员查询</p>
+    <div class="heritage-divider"></div>
+</div>
+
+{# ===== 数据统计 ===== #}
+<div class="stats-banner">
+    <div class="stats-grid">
+        <div class="stat-item">
+            <span class="stat-number" data-target="{{ total_genealogies }}">{{ total_genealogies }}</span>
+            <span class="stat-unit">部</span>
+            <span class="stat-label">收录族谱</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+            <span class="stat-number" data-target="{{ total_members }}">{{ total_members }}</span>
+            <span class="stat-unit">人</span>
+            <span class="stat-label">宗亲成员</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+            <span class="stat-number" data-target="{{ total_generations }}">{{ total_generations }}</span>
+            <span class="stat-unit">字</span>
+            <span class="stat-label">字辈收录</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+            <span class="stat-number" data-target="{{ region_list|length }}">{{ region_list|length }}</span>
+            <span class="stat-unit">地</span>
+            <span class="stat-label">覆盖地区</span>
+        </div>
+    </div>
+</div>
+
+{# ===== 入口导航 ===== #}
+<div class="home-entry-grid">
+    <a href="{{ url_for('genealogy.list_genealogies') }}" class="home-entry-card">
+        <div class="entry-icon">谱</div>
+        <div class="entry-title">族谱库</div>
+        <div class="entry-desc">按地区、年代检索收录族谱</div>
+    </a>
+    <a href="{{ url_for('culture.zibei') }}" class="home-entry-card">
+        <div class="entry-icon">辈</div>
+        <div class="entry-title">字辈查询</div>
+        <div class="entry-desc">输入辈字查找所属族谱</div>
+    </a>
+    <a href="{{ url_for('culture.index') }}" class="home-entry-card">
+        <div class="entry-icon">文</div>
+        <div class="entry-title">屈氏文化</div>
+        <div class="entry-desc">屈姓起源、郡望堂号</div>
+    </a>
+    <a href="{{ url_for('wiki.index') }}" class="home-entry-card">
+        <div class="entry-icon">典</div>
+        <div class="entry-title">屈氏百科</div>
+        <div class="entry-desc">名人、堂号、礼俗知识库</div>
+    </a>
+    <a href="{{ url_for('news.index') }}" class="home-entry-card">
+        <div class="entry-icon">闻</div>
+        <div class="entry-title">新闻动态</div>
+        <div class="entry-desc">宗亲活动、历史事件</div>
+    </a>
+    {% if is_logged_in %}
+    <a href="{{ url_for('query.query_member') }}" class="home-entry-card">
+        <div class="entry-icon">查</div>
+        <div class="entry-title">成员查询</div>
+        <div class="entry-desc">姓名查询、直系亲属关系图</div>
+    </a>
+    {% else %}
+    <a href="{{ url_for('culture.contact') }}" class="home-entry-card">
+        <div class="entry-icon">联</div>
+        <div class="entry-title">联系我们</div>
+        <div class="entry-desc">寻根问祖、提供资料</div>
+    </a>
+    {% endif %}
+</div>
+
+{# ===== 屈氏渊源 ===== #}
+<div class="heritage-section-divider"><span>屈氏渊源</span></div>
+<div class="origin-section">
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="origin-card">
+                <div class="origin-card-deco">源</div>
+                <h4 class="origin-title">屈姓溯源</h4>
+                <p>屈姓源出有二：其一出自芈姓，为春秋时楚国莫敖之后，以封地名为氏。楚武王熊通之子瑕受封于屈邑（今湖北秭归），其后世以邑名为氏，是为屈氏正宗。</p>
+                <p class="mb-0">其二出自北魏时期鲜卑族屈突氏，后汉化改姓为屈。屈氏族人历经数千年繁衍，遍布华夏大地，以湖南、陕西、贵州、湖北等地为盛。</p>
+                <div class="origin-tags">
+                    <span class="origin-tag"><i class="bi bi-geo-alt"></i> 发源地：湖北秭归</span>
+                    <span class="origin-tag"><i class="bi bi-calendar3"></i> 始于：春秋时期</span>
+                    <span class="origin-tag"><i class="bi bi-bookmark"></i> 始祖：屈瑕</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="origin-card origin-card-highlight">
+                <div class="origin-card-deco">堂</div>
+                <h4 class="origin-title">郡望堂号</h4>
+                <div class="hall-list">
+                    <div class="hall-item">
+                        <span class="hall-name">临海郡</span>
+                        <span class="hall-note">三国吴太平二年置</span>
+                    </div>
+                    <div class="hall-item">
+                        <span class="hall-name">河南郡</span>
+                        <span class="hall-note">汉高帝二年改秦三川郡置</span>
+                    </div>
+                    <div class="hall-item">
+                        <span class="hall-name">三闾堂</span>
+                        <span class="hall-note">屈原任三闾大夫而得名</span>
+                    </div>
+                    <div class="hall-item">
+                        <span class="hall-name">敦睦堂</span>
+                        <span class="hall-note">敦亲睦族之义</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ===== 名人典故 ===== #}
+<div class="heritage-section-divider"><span>屈氏名人</span></div>
+<div class="famous-section">
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="famous-card">
+                <div class="famous-era">战国</div>
+                <h5 class="famous-name">屈 原</h5>
+                <p class="famous-title">三闾大夫 · 爱国诗人</p>
+                <p class="famous-desc">中国最伟大的浪漫主义诗人之一，创立了"楚辞"文体。代表作《离骚》《天问》《九歌》等，被誉为"中华诗祖"。</p>
+                <div class="famous-quote">"路漫漫其修远兮，吾将上下而求索"</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="famous-card">
+                <div class="famous-era">春秋</div>
+                <h5 class="famous-name">屈 瑕</h5>
+                <p class="famous-title">楚国莫敖 · 屈氏始祖</p>
+                <p class="famous-desc">楚武王之子，受封于屈邑，为屈氏得姓始祖。官至莫敖（楚国最高军事官职之一），多次率师征战。</p>
+                <div class="famous-quote">屈氏开族之祖，薪火相传数千年</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="famous-card">
+                <div class="famous-era">唐代</div>
+                <h5 class="famous-name">屈突通</h5>
+                <p class="famous-title">凌烟阁功臣 · 蒋国公</p>
+                <p class="famous-desc">唐朝开国名将，凌烟阁二十四功臣之一。历仕隋唐两朝，以忠勇著称，封蒋国公，谥号"忠"。</p>
+                <div class="famous-quote">忠勇双全，名列凌烟阁二十四功臣</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ===== 按姓氏/地区查谱 ===== #}
+{% if surnames or region_list %}
+<div class="heritage-section-divider"><span>快速检索</span></div>
+<div class="search-section">
+    {% if surnames %}
+    <div class="search-group">
+        <span class="search-group-label"><i class="bi bi-person-vcard me-1"></i>按姓氏</span>
+        <div class="search-tags">
+            {% for s in surnames %}
+            <a href="{{ url_for('genealogy.list_genealogies', surname=s) }}" class="search-tag">{{ s }}氏</a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    {% if region_list %}
+    <div class="search-group">
+        <span class="search-group-label"><i class="bi bi-geo-alt me-1"></i>按地区</span>
+        <div class="search-tags">
+            {% for r in region_list %}
+            <a href="{{ url_for('genealogy.list_genealogies', region=r) }}" class="search-tag search-tag-region">{{ r }}</a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+{# ===== 近期入库族谱 ===== #}
+{% if recent_genealogies %}
+<div class="heritage-section-divider"><span>近期收录</span></div>
+<div class="row g-3">
+    {% for g in recent_genealogies %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card heritage-card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-start justify-content-between mb-2">
+                    <h6 class="mb-0 flex-grow-1">
+                        <a href="{{ url_for('genealogy.detail', genealogy_id=g.id) }}">{{ g.genealogy_name }}</a>
+                    </h6>
+                    {% if g.hall_name %}
+                    <span class="genealogy-hall-badge">{{ g.hall_name }}</span>
+                    {% endif %}
+                </div>
+                <div class="d-flex flex-wrap gap-2 mb-2">
+                    {% if g.region %}<span class="badge" style="background:rgba(176,138,80,0.15);color:var(--heritage-accent)"><i class="bi bi-geo-alt me-1"></i>{{ g.region }}</span>{% endif %}
+                    {% if g.period %}<span class="badge" style="background:rgba(139,58,46,0.1);color:var(--heritage-red)"><i class="bi bi-clock-history me-1"></i>{{ g.period }}</span>{% endif %}
+                </div>
+                {% if g.description %}
+                <p class="card-text small text-muted mb-2" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ g.description[:80] }}</p>
+                {% endif %}
+                {% if g.scattered_region %}
+                <p class="card-text small mb-2" style="color:var(--heritage-ink-muted)"><i class="bi bi-signpost-split me-1"></i>散居：{{ g.scattered_region[:40] }}</p>
+                {% endif %}
+                <div class="d-flex gap-2 mt-auto">
+                    <a href="{{ url_for('genealogy.detail', genealogy_id=g.id) }}" class="btn btn-sm btn-outline-primary flex-grow-1"><i class="bi bi-eye me-1"></i>查看</a>
+                    {% if is_logged_in %}
+                    <a href="{{ url_for('query.tree_view', genealogy_id=g.id) }}" class="btn btn-sm btn-outline-success"><i class="bi bi-diagram-3 me-1"></i>世系树</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<div class="text-center mt-3">
+    <a href="{{ url_for('genealogy.list_genealogies') }}" class="btn btn-primary">
+        <i class="bi bi-collection me-1"></i>查看全部族谱
+    </a>
+</div>
+{% endif %}
+
+{# ===== 最新动态 ===== #}
+{% if recent_news %}
+<div class="heritage-section-divider"><span>最新动态</span></div>
+<div class="news-home-list">
+    {% for art in recent_news %}
+    <a href="{{ url_for('news.detail', slug=art.slug) }}" class="news-home-item">
+        <span class="news-home-date">
+            {% if art.event_date %}{{ art.event_date }}{% else %}{{ art.create_time.strftime('%m-%d') }}{% endif %}
+        </span>
+        <span class="news-home-cat">{{ art.category_label }}</span>
+        <span class="news-home-title">{% if art.is_pinned %}<i class="bi bi-pin-angle-fill text-danger me-1"></i>{% endif %}{{ art.title }}</span>
+    </a>
+    {% endfor %}
+    <div class="text-center mt-3">
+        <a href="{{ url_for('news.index') }}" class="btn btn-outline-primary btn-sm">查看全部动态 <i class="bi bi-arrow-right ms-1"></i></a>
+    </div>
+</div>
+{% endif %}
+
+{# ===== 名句引言 ===== #}
+<div class="heritage-section-divider"><span>传世名句</span></div>
+<div class="quotes-section">
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="heritage-quote">
+                "亦余心之所善兮，虽九死其犹未悔。"<br>
+                <span class="quote-source">—— 屈原《离骚》</span>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="heritage-quote">
+                "长太息以掩涕兮，哀民生之多艰。"<br>
+                <span class="quote-source">—— 屈原《离骚》</span>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="heritage-quote">
+                "举世皆浊我独清，众人皆醉我独醒。"<br>
+                <span class="quote-source">—— 屈原《渔父》</span>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="heritage-quote">
+                "吾不能变心以从俗兮，固将愁苦而终穷。"<br>
+                <span class="quote-source">—— 屈原《涉江》</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ===== 底部说明 ===== #}
+<div class="heritage-section-divider"><span>关于本站</span></div>
+<div class="about-section">
+    <div class="row g-4 align-items-center">
+        <div class="col-md-8">
+            <p>本站为<strong>屈氏宗谱与文化平台</strong>，致力于收录整理各地屈氏族谱，展现屈氏历史渊源与文化传承。平台涵盖族谱检索、世系树查看、成员关系查询、字辈表查阅等功能。</p>
+            <p class="mb-0">系统保留多姓氏管理接口，可拓展收录其他姓氏族谱。
+                {% if not is_logged_in %}如需管理族谱与成员，请<a href="{{ url_for('login') }}">登录系统</a>。{% endif %}
+            </p>
+        </div>
+        <div class="col-md-4">
+            <div class="about-features">
+                <div class="about-feature"><i class="bi bi-book"></i><span>族谱数字化存档</span></div>
+                <div class="about-feature"><i class="bi bi-diagram-3"></i><span>可视化世系树</span></div>
+                <div class="about-feature"><i class="bi bi-search"></i><span>智能亲属查询</span></div>
+                <div class="about-feature"><i class="bi bi-shield-check"></i><span>隐私信息保护</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function(){
+    var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('in-view');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.origin-card, .famous-card, .stat-item, .about-feature, .search-group').forEach(function(el) {
+        observer.observe(el);
+    });
+
+    document.querySelectorAll('.stat-number[data-target]').forEach(function(el) {
+        var target = parseInt(el.getAttribute('data-target'), 10);
+        if (isNaN(target) || target <= 0) return;
+        var duration = 1600, start = 0, startTime = null;
+        function step(ts) {
+            if (!startTime) startTime = ts;
+            var progress = Math.min((ts - startTime) / duration, 1);
+            var ease = 1 - Math.pow(1 - progress, 3);
+            el.textContent = Math.floor(ease * target);
+            if (progress < 1) requestAnimationFrame(step);
+            else el.textContent = target;
+        }
+        var obs = new IntersectionObserver(function(entries) {
+            if (entries[0].isIntersecting) {
+                requestAnimationFrame(step);
+                obs.unobserve(el);
+            }
+        }, { threshold: 0.5 });
+        obs.observe(el);
+    });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block title %}字辈查询 - 屈氏宗谱{% endblock %}
+{% block meta_description %}输入你的辈字，查找可能所属的屈氏族谱分支。收录各地屈氏字辈排行。{% endblock %}
+{% block content %}
+
+<div class="text-center mb-4">
+    <p class="heritage-subtitle mb-3">寻根问祖 · 辈字溯源</p>
+    <h1 class="display-5 mb-2" style="letter-spacing:0.08em">字辈查询</h1>
+    <p class="lead text-muted mb-0">输入你的辈字，查找可能所属的族谱分支</p>
+    <div class="heritage-divider"></div>
+</div>
+
+{# ===== 搜索框 ===== #}
+<div class="zibei-search-box">
+    <form method="get" action="{{ url_for('culture.zibei') }}" class="zibei-form">
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input type="text" name="q" class="form-control form-control-lg" value="{{ keyword }}"
+                   placeholder="输入一个或多个辈字，如"光""昌""志"" autofocus>
+            <button type="submit" class="btn btn-primary btn-lg">查 询</button>
+        </div>
+        <p class="form-text text-center mt-2">提示：输入你名字中的辈字（通常是名字的第一个字或第二个字），系统将匹配所有收录的字辈表</p>
+    </form>
+</div>
+
+{# ===== 搜索结果 ===== #}
+{% if keyword %}
+<div class="heritage-section-divider"><span>查询结果</span></div>
+{% if results %}
+<p class="text-muted mb-3">找到 <strong>{{ results|length }}</strong> 部族谱的字辈中包含"<strong>{{ keyword }}</strong>"：</p>
+<div class="row g-3 mb-4">
+    {% for item in results %}
+    <div class="col-lg-6">
+        <div class="card heritage-card h-100 zibei-result-card">
+            <div class="card-body">
+                <div class="d-flex align-items-start justify-content-between mb-2">
+                    <h6 class="mb-0">
+                        <a href="{{ url_for('genealogy.detail', genealogy_id=item.genealogy.id) }}">{{ item.genealogy.genealogy_name }}</a>
+                    </h6>
+                    {% if item.genealogy.hall_name %}
+                    <span class="genealogy-hall-badge">{{ item.genealogy.hall_name }}</span>
+                    {% endif %}
+                </div>
+                <div class="d-flex flex-wrap gap-2 mb-2">
+                    {% if item.genealogy.region %}<span class="badge" style="background:rgba(176,138,80,0.15);color:var(--heritage-accent)"><i class="bi bi-geo-alt me-1"></i>{{ item.genealogy.region }}</span>{% endif %}
+                    {% if item.matched_positions %}<span class="badge" style="background:rgba(139,58,46,0.1);color:var(--heritage-red)"><i class="bi bi-bullseye me-1"></i>第 {{ item.matched_positions|join('、') }} 世</span>{% endif %}
+                </div>
+                <div class="zibei-chars">
+                    {% for gen in item.generations %}
+                    <span class="zibei-char {% if keyword in gen.character %}zibei-char-match{% endif %}" title="第{{ gen.sort_order + 1 }}世">{{ gen.character }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-4">
+    <i class="bi bi-emoji-neutral" style="font-size:2.5rem;color:var(--heritage-ink-muted)"></i>
+    <p class="mt-2 text-muted">未在已收录的字辈表中找到"<strong>{{ keyword }}</strong>"</p>
+    <p class="small text-muted">本站字辈数据仍在完善中，如你了解所属支系的字辈排行，欢迎<a href="{{ url_for('culture.contact') }}">联系我们</a>补充</p>
+</div>
+{% endif %}
+{% endif %}
+
+{# ===== 全部字辈总览 ===== #}
+<div class="heritage-section-divider"><span>各谱字辈总览</span></div>
+{% if all_genealogies %}
+<p class="text-muted small mb-3">以下展示本站收录的各族谱字辈排行，点击族谱名可查看详情。</p>
+<div class="row g-3">
+    {% for item in all_genealogies %}
+    <div class="col-lg-6">
+        <div class="card heritage-card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-start justify-content-between mb-2">
+                    <h6 class="mb-0">
+                        <a href="{{ url_for('genealogy.detail', genealogy_id=item.genealogy.id) }}">{{ item.genealogy.genealogy_name }}</a>
+                    </h6>
+                    {% if item.genealogy.region %}
+                    <span class="badge" style="background:rgba(176,138,80,0.15);color:var(--heritage-accent)">{{ item.genealogy.region }}</span>
+                    {% endif %}
+                </div>
+                <div class="zibei-chars">
+                    {% for gen in item.generations %}
+                    <span class="zibei-char {% if keyword and keyword in gen.character %}zibei-char-match{% endif %}" title="第{{ gen.sort_order + 1 }}世{% if gen.note %} - {{ gen.note }}{% endif %}">{{ gen.character }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p class="text-muted text-center">暂无字辈数据，<a href="{{ url_for('culture.contact') }}">联系我们</a>提供字辈信息。</p>
+{% endif %}
+
+{% endblock %}

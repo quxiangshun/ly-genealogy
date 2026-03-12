@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}{{ entry.title }} - 屈氏百科 - 屈氏宗谱{% endblock %}
+{% block meta_description %}{{ entry.summary or entry.title }}{% endblock %}
+{% block content %}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb" style="font-size:.9rem">
+        <li class="breadcrumb-item"><a href="{{ url_for('index') }}">首页</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('wiki.index') }}">屈氏百科</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('wiki.index', cat=entry.category) }}">{{ entry.category_label }}</a></li>
+        <li class="breadcrumb-item active">{{ entry.title }}</li>
+    </ol>
+</nav>
+
+<article class="wiki-article">
+    <header class="wiki-article-header mb-4">
+        <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+            <span class="wiki-card-cat">{{ entry.category_label }}</span>
+            {% if entry.era %}<span class="wiki-card-era">{{ entry.era }}</span>{% endif %}
+        </div>
+        <h1 class="wiki-article-title">{{ entry.title }}</h1>
+        {% if entry.summary %}
+        <p class="wiki-article-summary">{{ entry.summary }}</p>
+        {% endif %}
+        <div class="wiki-article-meta">
+            <span><i class="bi bi-clock me-1"></i>{{ entry.create_time.strftime('%Y-%m-%d') }}</span>
+            {% if entry.update_time and entry.update_time != entry.create_time %}
+            <span><i class="bi bi-pencil me-1"></i>更新于 {{ entry.update_time.strftime('%Y-%m-%d') }}</span>
+            {% endif %}
+        </div>
+    </header>
+
+    <div class="wiki-article-body">
+        {{ entry.content | safe }}
+    </div>
+
+    {% if is_logged_in %}
+    <div class="mt-4">
+        <a href="{{ url_for('wiki.admin_edit', entry_id=entry.id) }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil me-1"></i>编辑此词条</a>
+    </div>
+    {% endif %}
+</article>
+
+{% if related %}
+<div class="heritage-section-divider mt-5"><span>相关词条</span></div>
+<div class="row g-3">
+    {% for r in related %}
+    <div class="col-md-4 col-6">
+        <a href="{{ url_for('wiki.detail', slug=r.slug) }}" class="wiki-card-link">
+            <div class="card heritage-card wiki-card h-100">
+                <div class="card-body">
+                    <span class="wiki-card-cat small">{{ r.category_label }}</span>
+                    <h6 class="wiki-card-title mt-1 mb-1">{{ r.title }}</h6>
+                    {% if r.summary %}<p class="wiki-card-summary small">{{ r.summary[:60] }}…</p>{% endif %}
+                </div>
+            </div>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}

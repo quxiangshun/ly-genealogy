@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% block title %}{{ genealogy.genealogy_name }} - 屈氏宗谱{% endblock %}
+{% block content %}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('genealogy.list_genealogies') }}"><i class="bi bi-book me-1"></i>族谱库</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ genealogy.genealogy_name }}</li>
+    </ol>
+</nav>
+
+{# ===== 标题区 ===== #}
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
+    <div>
+        <h2 class="mb-1">{{ genealogy.genealogy_name }}</h2>
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <span class="badge" style="background:rgba(176,138,80,0.15);color:var(--heritage-accent);font-size:0.85rem">{{ genealogy.surname }}氏</span>
+            {% if genealogy.hall_name %}<span class="badge" style="background:rgba(92,107,74,0.12);color:#4a5c3a;font-size:0.85rem">{{ genealogy.hall_name }}</span>{% endif %}
+            {% if genealogy.region %}<span class="text-muted small"><i class="bi bi-geo-alt me-1"></i>{{ genealogy.region }}</span>{% endif %}
+        </div>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        {% if is_logged_in %}
+        <a href="{{ url_for('member.list_members', genealogy_id=genealogy.id) }}" class="btn btn-primary"><i class="bi bi-people me-1"></i>成员列表</a>
+        <a href="{{ url_for('query.tree_view', genealogy_id=genealogy.id) }}" class="btn btn-outline-success"><i class="bi bi-diagram-3 me-1"></i>世系树</a>
+        <a href="{{ url_for('genealogy.generations', genealogy_id=genealogy.id) }}" class="btn btn-outline-secondary"><i class="bi bi-list-ol me-1"></i>字辈表</a>
+        <a href="{{ url_for('genealogy.edit', genealogy_id=genealogy.id) }}" class="btn btn-outline-primary"><i class="bi bi-pencil me-1"></i>编辑</a>
+        {% else %}
+        <a href="{{ url_for('login', next=url_for('member.list_members', genealogy_id=genealogy.id)) }}" class="btn btn-outline-primary"><i class="bi bi-lock me-1"></i>登录后查看成员与世系树</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    {# ===== 左栏：谱籍信息 ===== #}
+    <div class="col-lg-8">
+        <div class="card heritage-card mb-4">
+            <div class="card-header"><i class="bi bi-journal-richtext me-2"></i>谱籍信息</div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    {% if genealogy.region %}
+                    <dt class="col-sm-3"><i class="bi bi-geo-alt me-1 text-muted"></i>地区</dt>
+                    <dd class="col-sm-9">{{ genealogy.region }}</dd>
+                    {% endif %}
+                    {% if genealogy.period %}
+                    <dt class="col-sm-3"><i class="bi bi-clock-history me-1 text-muted"></i>年代/刊本</dt>
+                    <dd class="col-sm-9">{{ genealogy.period }}</dd>
+                    {% endif %}
+                    {% if genealogy.volumes %}
+                    <dt class="col-sm-3"><i class="bi bi-journal-text me-1 text-muted"></i>卷数</dt>
+                    <dd class="col-sm-9">{{ genealogy.volumes }}</dd>
+                    {% endif %}
+                    {% if genealogy.hall_name %}
+                    <dt class="col-sm-3"><i class="bi bi-house-door me-1 text-muted"></i>堂号</dt>
+                    <dd class="col-sm-9">{{ genealogy.hall_name }}</dd>
+                    {% endif %}
+                    {% if genealogy.scattered_region %}
+                    <dt class="col-sm-3"><i class="bi bi-pin-map me-1 text-muted"></i>散居地</dt>
+                    <dd class="col-sm-9">{{ genealogy.scattered_region }}</dd>
+                    {% endif %}
+                    {% if genealogy.collection_info %}
+                    <dt class="col-sm-3"><i class="bi bi-building me-1 text-muted"></i>馆藏信息</dt>
+                    <dd class="col-sm-9">{{ genealogy.collection_info }}</dd>
+                    {% endif %}
+                </dl>
+                {% if genealogy.founder_info %}
+                <hr>
+                <div class="mb-0">
+                    <strong><i class="bi bi-person-lines-fill me-1"></i>始祖/世系源流：</strong>
+                    <div class="heritage-quote" style="margin:0.5rem 0 0 0">{{ genealogy.founder_info }}</div>
+                </div>
+                {% endif %}
+                {% if genealogy.description %}
+                <hr>
+                <div class="heritage-quote" style="margin:0">{{ genealogy.description }}</div>
+                {% endif %}
+                {% if genealogy.source_url %}
+                <hr>
+                <p class="mb-0">
+                    <i class="bi bi-link-45deg me-1"></i><strong>参考链接：</strong>
+                    {% if genealogy.source_url.startswith('http') %}
+                    <a href="{{ genealogy.source_url }}" target="_blank" rel="noopener">在线查阅 <i class="bi bi-box-arrow-up-right"></i></a>
+                    {% else %}
+                    <span class="text-muted">{{ genealogy.source_url }}</span>
+                    {% endif %}
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {# ===== 右栏：统计 + 字辈 ===== #}
+    <div class="col-lg-4">
+        {% if is_logged_in %}
+        <div class="card heritage-card mb-4">
+            <div class="card-header"><i class="bi bi-bar-chart me-2"></i>统计</div>
+            <div class="card-body">
+                <div class="d-flex justify-content-around text-center">
+                    <div>
+                        <div style="font-size:1.6rem;font-weight:700;color:var(--heritage-accent)">{{ member_count }}</div>
+                        <div class="small text-muted">已录成员</div>
+                    </div>
+                    <div>
+                        <div style="font-size:1.6rem;font-weight:700;color:var(--heritage-red)">{{ gen_count }}</div>
+                        <div class="small text-muted">字辈</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% if genealogy.generations %}
+        <div class="card heritage-card mb-4">
+            <div class="card-header"><i class="bi bi-list-ol me-2"></i>字辈摘要</div>
+            <div class="card-body">
+                <p class="mb-0" style="letter-spacing:0.15em;line-height:2">{% for gen in genealogy.generations %}<span class="me-1" style="font-size:1.05rem">{{ gen.character }}</span>{% endfor %}</p>
+                {% if is_logged_in %}
+                <a href="{{ url_for('genealogy.generations', genealogy_id=genealogy.id) }}" class="btn btn-sm btn-outline-secondary mt-2"><i class="bi bi-pencil me-1"></i>编辑字辈表</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if is_logged_in %}
+<div class="heritage-section-divider"><span>管理</span></div>
+<form method="post" action="{{ url_for('genealogy.delete', genealogy_id=genealogy.id) }}" onsubmit="return confirm('确定删除该族谱？将同时删除其下所有成员与字辈数据。');">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash me-1"></i>删除族谱</button>
+</form>
+{% endif %}
+{% endblock %}

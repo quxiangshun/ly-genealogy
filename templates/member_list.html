@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}成员列表 - 屈氏宗谱{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>成员管理</h2>
+    <a href="{{ url_for('member.add') }}" class="btn btn-primary">新增成员</a>
+</div>
+
+<form method="get" class="row g-3 mb-4">
+    <div class="col-auto">
+        <label class="form-label">族谱</label>
+        <select name="genealogy_id" class="form-select" onchange="this.form.submit()">
+            <option value="">全部</option>
+            {% for g in genealogies %}
+            <option value="{{ g.id }}" {% if filter_genealogy_id == g.id %}selected{% endif %}>{{ g.genealogy_name }}（{{ g.surname }}氏）</option>
+            {% endfor %}
+        </select>
+    </div>
+</form>
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>照片</th>
+                <th>姓名</th>
+                <th>世次</th>
+                <th>字/号</th>
+                <th>性别</th>
+                <th>出生日期</th>
+                <th>所属族谱</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for m in members %}
+            <tr>
+                <td>
+                    {% if m.photo %}
+                    <img src="{{ url_for('static', filename=m.photo) }}" alt="{{ m.name | mask_name }}" class="member-photo-thumb rounded">
+                    {% else %}
+                    <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+                <td>{{ m.name | mask_name }}</td>
+                <td>{{ m.generation_number if m.generation_number else '-' }}</td>
+                <td>{{ m.courtesy_name if m.courtesy_name else '-' }}</td>
+                <td>{{ '男' if m.gender == 'M' else '女' }}</td>
+                <td>{{ m.birth_date if m.birth_date else '-' }}</td>
+                <td>{{ m.genealogy.genealogy_name }}</td>
+                <td>
+                    <a href="{{ url_for('query.member_detail', member_id=m.id) }}" class="btn btn-sm btn-info">亲属关系</a>
+                    <a href="{{ url_for('member.edit', member_id=m.id) }}" class="btn btn-sm btn-outline-primary">编辑</a>
+                    <form method="post" action="{{ url_for('member.delete', member_id=m.id) }}" class="d-inline" onsubmit="return confirm('确定删除？若有子女，其父母信息将置空。');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">删除</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="8" class="text-center text-muted">暂无成员。请先选择族谱并<a href="{{ url_for('member.add') }}">新增成员</a>。</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

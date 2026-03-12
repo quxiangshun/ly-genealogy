@@ -1,0 +1,9 @@
+# 方式一：有域名（Caddy 自动申请 HTTPS 证书）
+# your-domain.com {
+#     reverse_proxy 127.0.0.1:5001
+# }
+
+# 方式二：仅用 IP 访问（HTTP，无证书）
+:80 {
+    reverse_proxy 127.0.0.1:5001
+}

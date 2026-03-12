@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}族谱库 - 屈氏宗谱{% endblock %}
+{% block meta_description %}屈氏族谱库：按姓氏、地区、年代检索屈氏宗谱，查看谱籍、字辈与成员。{% endblock %}
+{% block content %}
+
+<div class="mb-4">
+    <h2 class="border-bottom pb-2 mb-2"><i class="bi bi-book me-2"></i>族谱库</h2>
+    <p class="text-muted mb-0">收录各地屈氏族谱，按姓氏、地区、年代检索。系统保留多姓氏接口。</p>
+</div>
+
+{# ===== 检索栏 ===== #}
+<div class="card heritage-card mb-4">
+    <div class="card-body py-2">
+        <form method="get" class="row g-2 align-items-end flex-wrap">
+            <div class="col-auto">
+                <select name="surname" class="form-select form-select-sm">
+                    <option value="">全部姓氏</option>
+                    {% for s in all_surnames %}
+                    <option value="{{ s }}" {% if filter_surname == s %}selected{% endif %}>{{ s }}氏</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-auto">
+                <select name="region" class="form-select form-select-sm">
+                    <option value="">全部地区</option>
+                    {% for r in all_regions %}
+                    <option value="{{ r }}" {% if filter_region == r %}selected{% endif %}>{{ r }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-auto">
+                <input type="text" name="period" class="form-control form-control-sm" placeholder="年代关键字" value="{{ filter_period or '' }}" style="width:10rem">
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-search me-1"></i>检索</button>
+                <a href="{{ url_for('genealogy.list_genealogies') }}" class="btn btn-sm btn-outline-secondary">清空</a>
+            </div>
+            {% if is_logged_in %}
+            <div class="col-auto ms-auto">
+                <a href="{{ url_for('genealogy.add') }}" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg me-1"></i>新增族谱</a>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+{# ===== 族谱卡片 ===== #}
+<div class="row g-3">
+    {% for g in genealogies %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card heritage-card h-100">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title mb-2">
+                    <a href="{{ url_for('genealogy.detail', genealogy_id=g.id) }}" class="text-decoration-none" style="color:var(--heritage-ink)">{{ g.genealogy_name }}</a>
+                </h5>
+                <div class="d-flex flex-wrap gap-1 mb-2">
+                    <span class="badge" style="background:rgba(176,138,80,0.12);color:var(--heritage-accent)">{{ g.surname }}氏</span>
+                    {% if g.hall_name %}<span class="badge" style="background:rgba(92,107,74,0.1);color:#4a5c3a">{{ g.hall_name }}</span>{% endif %}
+                    {% if g.region %}<span class="badge" style="background:rgba(124,74,30,0.08);color:var(--heritage-accent)"><i class="bi bi-geo-alt"></i> {{ g.region }}</span>{% endif %}
+                </div>
+                <ul class="list-unstyled small text-muted mb-2">
+                    {% if g.period %}<li><i class="bi bi-clock-history me-1"></i>{{ g.period }}</li>{% endif %}
+                    {% if g.volumes %}<li><i class="bi bi-journal-text me-1"></i>{{ g.volumes }}</li>{% endif %}
+                    {% if g.scattered_region %}<li><i class="bi bi-pin-map me-1"></i>{{ g.scattered_region }}</li>{% endif %}
+                    {% if g.collection_info %}<li><i class="bi bi-building me-1"></i>{{ g.collection_info[:40] }}{% if g.collection_info|length > 40 %}…{% endif %}</li>{% endif %}
+                </ul>
+                <div class="mt-auto pt-2 border-top d-flex align-items-center gap-2 flex-wrap">
+                    {% if is_logged_in %}<span class="text-muted small"><i class="bi bi-people me-1"></i>{{ member_counts.get(g.id, 0) }} 人</span>{% endif %}
+                    <a href="{{ url_for('genealogy.detail', genealogy_id=g.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye me-1"></i>详情</a>
+                    <a href="{{ url_for('query.tree_view', genealogy_id=g.id) }}" class="btn btn-sm btn-outline-success"><i class="bi bi-diagram-3 me-1"></i>世系</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="card heritage-card">
+            <div class="card-body text-center text-muted py-5">
+                <i class="bi bi-journal-x" style="font-size:3rem;opacity:0.3"></i>
+                <p class="mt-2 mb-0">暂无族谱数据。</p>
+                {% if is_logged_in %}
+                <p class="small mb-0 mt-1">请<a href="{{ url_for('genealogy.add') }}">新增族谱</a>，或运行 <code>python -m scripts.seed_public_genealogies</code> 入库公开资料。</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

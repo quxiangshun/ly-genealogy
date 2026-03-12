@@ -14,6 +14,8 @@
 
 ## 目录结构
 
+**源码（开发）：**
+
 ```
 ├── packages/
 │   ├── server/          # Express API
@@ -21,8 +23,25 @@
 │   └── admin/           # Vue Admin SPA
 ├── docs/                # 族谱原始资料（PDF/DOC）
 ├── ecosystem.config.cjs # PM2 配置
-├── Caddyfile            # Caddy 反向代理
-└── deploy.sh            # Ubuntu 部署脚本
+├── Caddyfile            # Caddy 反向代理（端口 9997）
+└── deploy.sh            # 一键部署脚本
+```
+
+**生产部署（/var/www/genealogy/）：**
+
+```
+├── server/              # Express API
+│   ├── dist/            # 编译后的 JS
+│   ├── data/            # SQLite 数据库 + 上传文件
+│   ├── node_modules/    # 运行时依赖
+│   └── package.json
+├── admin/
+│   └── dist/            # 管理后台静态文件
+├── web/
+│   └── .output/         # Nuxt SSR 构建产物
+├── logs/                # 日志
+├── ecosystem.config.cjs # PM2 配置
+└── Caddyfile            # Caddy 反向代理
 ```
 
 ## 快速开始
@@ -48,35 +67,47 @@ pnpm dev:admin
 
 - API: http://localhost:5001
 - 前端: http://localhost:3000
-- 管理后台: http://localhost:3002/admin/
-
-### 种子数据
-
-```bash
-pnpm seed
-```
-
-### 从旧数据库迁移
-
-```bash
-pnpm migrate -- /path/to/old/genealogy.db
-```
+- 管理后台: http://localhost:3001/admin/
 
 ## 生产部署
 
-### 构建
+### 一键部署
 
 ```bash
+# 在源码目录执行（自动构建 + 部署到 /var/www/genealogy/）
+bash deploy.sh
+```
+
+脚本会自动：构建三个项目 → 复制到 `/var/www/genealogy/{server,admin,web}` → 安装 server 生产依赖 → PM2 启动
+
+### 手动部署
+
+```bash
+# 1. 构建
 pnpm build
-```
 
-### PM2 启动
-
-```bash
-# 编辑 ecosystem.config.cjs 中的 JWT_SECRET
+# 2. 启动 PM2（在部署目录）
+cd /var/www/genealogy
 pm2 start ecosystem.config.cjs
-node packages/web/.output/server/index.mjs
+
+# 3. 启动 Caddy（监听 9997 端口）
+caddy start --config Caddyfile
 ```
+
+### 服务架构
+
+```
+浏览器 → Caddy(:9997)
+              ├─ /api/*     → Express(:5001)
+              ├─ /admin/*   → Express(:5001) → 静态文件
+              ├─ /uploads/* → Express(:5001)
+              └─ /*         → Nuxt SSR(:3000)
+```
+
+生产访问地址：
+- 前台: http://39.106.39.125:9997/
+- 后台: http://39.106.39.125:9997/admin/
+- API:  http://39.106.39.125:9997/api/
 
 ### 默认管理员
 

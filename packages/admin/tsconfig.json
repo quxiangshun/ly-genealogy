@@ -3,6 +3,9 @@
   "compilerOptions": {
     "jsx": "preserve",
     "jsxImportSource": "vue",
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
     "paths": { "@/*": ["./src/*"] }
   },
   "include": ["src/**/*.ts", "src/**/*.vue"]

@@ -1,18 +1,12 @@
-# 方式一：有域名（Caddy 自动申请 HTTPS 证书）
-# your-domain.com {
-#     reverse_proxy /api/* localhost:5001
-#     reverse_proxy /admin/* localhost:5001
-#     reverse_proxy /uploads/* localhost:5001
-#     reverse_proxy localhost:3000
-# }
+# 屈氏宗谱 Caddy 反向代理配置
+# 监听 9997 端口，代理到后端 Express(5001) 和 Nuxt(3000)
 
-# 方式二：仅用 IP 访问（HTTP，无证书）
-:80 {
-    # API 和管理后台由 Express 处理
+:9997 {
+    # API、管理后台、上传文件 → Express
     reverse_proxy /api/* localhost:5001
     reverse_proxy /admin/* localhost:5001
     reverse_proxy /uploads/* localhost:5001
 
-    # 其余请求由 Nuxt 处理
+    # 其余请求 → Nuxt SSR
     reverse_proxy localhost:3000
 }

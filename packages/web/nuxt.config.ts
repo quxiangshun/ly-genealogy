@@ -39,11 +39,13 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      apiBase: process.env.API_BASE || 'http://localhost:5001',
+      apiBase: process.env.API_BASE || '',
       siteName: '屈氏宗谱',
     },
   },
   routeRules: {
+    '/api/**': { proxy: 'http://localhost:5001/api/**' },
+    '/uploads/**': { proxy: 'http://localhost:5001/uploads/**' },
     '/': { swr: 3600 },
     '/genealogy/**': { swr: 1800 },
     '/wiki/**': { swr: 600 },
@@ -56,6 +58,7 @@ export default defineNuxtConfig({
   nitro: {
     devProxy: {
       '/api': { target: 'http://localhost:5001', changeOrigin: true },
+      '/uploads': { target: 'http://localhost:5001', changeOrigin: true },
     },
   },
   devtools: { enabled: false },

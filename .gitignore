@@ -36,3 +36,6 @@ packages/server/data/uploads/members/*
 # TypeScript compiled output in source dirs
 packages/admin/src/**/*.js
 packages/admin/src/**/*.js.map
+packages/admin/src/**/*.d.ts
+packages/admin/src/**/*.d.ts.map
+*.tsbuildinfo

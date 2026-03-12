@@ -1,4 +1,0 @@
-import 'md-editor-v3/lib/style.css';
-declare const _default: import("vue").DefineComponent<{}, {}, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {}, string, import("vue").PublicProps, Readonly<{}> & Readonly<{}>, {}, {}, {}, {}, string, import("vue").ComponentProvideOptions, true, {}, any>;
-export default _default;
-//# sourceMappingURL=Form.vue.d.ts.map

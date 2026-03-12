@@ -1,80 +1,127 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_DIR="/var/www/genealogy-node"
+SRC_DIR="$(cd "$(dirname "$0")" && pwd)"
+DEPLOY_DIR="/var/www/genealogy"
 NODE_VERSION="22"
 
 echo "============================================="
-echo "  屈氏宗谱 Node.js 部署脚本"
+echo "  屈氏宗谱 部署脚本"
+echo "  源码: $SRC_DIR"
+echo "  部署: $DEPLOY_DIR"
 echo "============================================="
 
-# 1. 检查 Node.js
+# ---------- 环境检查 ----------
+
 if ! command -v node &>/dev/null; then
-  echo "[1/7] 安装 Node.js $NODE_VERSION ..."
+  echo "[1/8] 安装 Node.js $NODE_VERSION ..."
   curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | sudo -E bash -
   sudo apt-get install -y nodejs
 fi
-echo "[1/7] Node.js $(node -v)"
+echo "[1/8] Node.js $(node -v)"
 
-# 2. 安装 pnpm / PM2
 if ! command -v pnpm &>/dev/null; then
-  echo "[2/7] 安装 pnpm ..."
+  echo "[2/8] 安装 pnpm ..."
   npm install -g pnpm
 fi
 if ! command -v pm2 &>/dev/null; then
-  echo "[2/7] 安装 PM2 ..."
+  echo "[2/8] 安装 PM2 ..."
   npm install -g pm2
 fi
-echo "[2/7] pnpm $(pnpm -v), PM2 $(pm2 -v)"
+echo "[2/8] pnpm $(pnpm -v), PM2 $(pm2 -v)"
 
-# 3. 安装依赖
-echo "[3/7] 安装项目依赖 ..."
-cd "$APP_DIR"
+# ---------- 构建 ----------
+
+echo "[3/8] 安装项目依赖 ..."
+cd "$SRC_DIR"
 pnpm install
 
-# 4. 构建
-echo "[4/7] 构建 Express API ..."
+echo "[4/8] 构建 Express API ..."
 pnpm --filter @ly/server build
 
-echo "[5/7] 构建 Admin SPA ..."
+echo "[5/8] 构建 Admin SPA ..."
 pnpm --filter @ly/admin build
 
-echo "[6/7] 构建 Nuxt 前端 ..."
+echo "[6/8] 构建 Nuxt 前端 ..."
 pnpm --filter @ly/web build
 
-# 7. 迁移数据（可选）
-if [ -f "/var/www/genealogy/genealogy.db" ]; then
-  echo "[7/7] 从旧数据库迁移数据 ..."
-  pnpm --filter @ly/server migrate -- /var/www/genealogy/genealogy.db
+# ---------- 部署到目标目录 ----------
+
+echo "[7/8] 部署文件到 $DEPLOY_DIR ..."
+
+mkdir -p "$DEPLOY_DIR"/{server,admin,web,logs}
+mkdir -p "$DEPLOY_DIR/server/data/uploads"
+
+# Server: dist + package.json + 安装生产依赖
+rm -rf "$DEPLOY_DIR/server/dist"
+cp -r "$SRC_DIR/packages/server/dist" "$DEPLOY_DIR/server/dist"
+cp "$SRC_DIR/packages/server/package.json" "$DEPLOY_DIR/server/package.json"
+cd "$DEPLOY_DIR/server"
+npm install --omit=dev --no-package-lock 2>/dev/null || npm install --production --no-package-lock
+
+# Admin: 静态文件
+rm -rf "$DEPLOY_DIR/admin/dist"
+cp -r "$SRC_DIR/packages/admin/dist" "$DEPLOY_DIR/admin/dist"
+
+# Web: Nuxt .output (自包含)
+rm -rf "$DEPLOY_DIR/web/.output"
+cp -r "$SRC_DIR/packages/web/.output" "$DEPLOY_DIR/web/.output"
+
+# 配置文件
+cp "$SRC_DIR/ecosystem.config.cjs" "$DEPLOY_DIR/ecosystem.config.cjs"
+cp "$SRC_DIR/Caddyfile" "$DEPLOY_DIR/Caddyfile"
+
+# ---------- 数据迁移（首次部署可选） ----------
+
+cd "$SRC_DIR"
+if [ ! -f "$DEPLOY_DIR/server/data/genealogy.db" ]; then
+  if [ -f "/var/www/genealogy-old/genealogy.db" ]; then
+    echo "[8/8] 从旧数据库迁移数据 ..."
+    DB_PATH="$DEPLOY_DIR/server/data/genealogy.db" \
+      pnpm --filter @ly/server migrate -- /var/www/genealogy-old/genealogy.db
+  else
+    echo "[8/8] 运行种子数据 ..."
+    DB_PATH="$DEPLOY_DIR/server/data/genealogy.db" \
+      pnpm --filter @ly/server seed
+  fi
 else
-  echo "[7/7] 运行种子数据 ..."
-  pnpm --filter @ly/server seed
+  echo "[8/8] 数据库已存在，跳过迁移"
 fi
 
-# 创建日志目录
-mkdir -p logs
+# ---------- 启动服务 ----------
 
-# 启动 PM2
 echo "============================================="
 echo "  启动服务 ..."
 echo "============================================="
 
-# 生成 JWT_SECRET
-if [ -z "$(grep 'JWT_SECRET' ecosystem.config.cjs | grep -v '^\s*//' | grep -v "''$")" ]; then
+cd "$DEPLOY_DIR"
+
+# 检查 JWT_SECRET
+if grep -q "JWT_SECRET: ''" ecosystem.config.cjs; then
   JWT_SECRET=$(openssl rand -hex 32)
-  echo "生成 JWT_SECRET: $JWT_SECRET"
-  echo "请将其填入 ecosystem.config.cjs 的 JWT_SECRET 字段"
+  sed -i "s|JWT_SECRET: ''|JWT_SECRET: '$JWT_SECRET'|" ecosystem.config.cjs
+  echo "已自动生成 JWT_SECRET"
 fi
 
+pm2 delete ly-genealogy-api ly-genealogy-web 2>/dev/null || true
 pm2 start ecosystem.config.cjs
 pm2 save
 
 echo ""
-echo "部署完成！"
-echo "  API:   http://localhost:5001"
-echo "  Admin: http://localhost:5001/admin/"
+echo "============================================="
+echo "  部署完成！"
+echo "============================================="
 echo ""
-echo "还需要："
-echo "  1. 配置 Caddy (参考 Caddyfile)"
-echo "  2. 启动 Nuxt: cd $APP_DIR && node packages/web/.output/server/index.mjs"
-echo "  3. 或用 PM2 管理 Nuxt 进程"
+echo "  目录结构:"
+echo "    $DEPLOY_DIR/server/  Express API (端口 5001)"
+echo "    $DEPLOY_DIR/admin/   管理后台 SPA"
+echo "    $DEPLOY_DIR/web/     Nuxt SSR (端口 3000)"
+echo ""
+echo "  访问地址 (需启动 Caddy):"
+echo "    前台: http://39.106.39.125:9997/"
+echo "    后台: http://39.106.39.125:9997/admin/"
+echo "    API:  http://39.106.39.125:9997/api/"
+echo ""
+echo "  启动 Caddy:"
+echo "    caddy start --config $DEPLOY_DIR/Caddyfile"
+echo ""

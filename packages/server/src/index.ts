@@ -43,11 +43,10 @@ app.use('/api/news', newsRouter);
 app.use('/api/upload', uploadRouter);
 app.use('/api/stats', statsRouter);
 
-const adminDistPath = path.resolve(__dirname, '../admin/dist');
-if (fs.existsSync(adminDistPath)) {
-  app.use('/admin', express.static(adminDistPath));
+if (fs.existsSync(config.ADMIN_DIST)) {
+  app.use('/admin', express.static(config.ADMIN_DIST));
   app.get('/admin/*', (_req, res) => {
-    res.sendFile(path.join(adminDistPath, 'index.html'));
+    res.sendFile(path.join(config.ADMIN_DIST, 'index.html'));
   });
 }
 

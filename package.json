@@ -1,0 +1,21 @@
+{
+  "name": "ly-genealogy",
+  "private": true,
+  "pnpm": {
+    "onlyBuiltDependencies": ["@parcel/watcher", "bcrypt", "better-sqlite3", "esbuild", "vue-demi"]
+  },
+  "scripts": {
+    "dev:server": "pnpm --filter @ly/server dev",
+    "dev:web": "pnpm --filter @ly/web dev",
+    "dev:admin": "pnpm --filter @ly/admin dev",
+    "dev": "pnpm --filter @ly/server dev & pnpm --filter @ly/web dev",
+    "build": "pnpm --filter @ly/server build && pnpm --filter @ly/admin build && pnpm --filter @ly/web build",
+    "build:server": "pnpm --filter @ly/server build",
+    "build:web": "pnpm --filter @ly/web build",
+    "build:admin": "pnpm --filter @ly/admin build",
+    "start:server": "pnpm --filter @ly/server start",
+    "start:web": "node packages/web/.output/server/index.mjs",
+    "seed": "pnpm --filter @ly/server seed",
+    "migrate": "pnpm --filter @ly/server migrate"
+  }
+}

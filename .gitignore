@@ -1,15 +1,19 @@
-# Python
-__pycache__/
-*.py[cod]
-*.pyo
-*.egg-info/
+# Dependencies
+node_modules/
+
+# Build output
+.output/
+.nuxt/
 dist/
-build/
-.venv/
-venv/
 
 # Database
 *.db
+*.db-shm
+*.db-wal
+
+# Environment
+.env
+.env.*
 
 # IDE
 .idea/
@@ -21,10 +25,14 @@ venv/
 .DS_Store
 Thumbs.db
 
-# Uploads (keep directory structure)
-static/uploads/members/*
-!static/uploads/members/.gitkeep
-
 # Logs
 logs/
 *.log
+
+# Uploads
+packages/server/data/uploads/members/*
+!packages/server/data/uploads/members/.gitkeep
+
+# TypeScript compiled output in source dirs
+packages/admin/src/**/*.js
+packages/admin/src/**/*.js.map

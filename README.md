@@ -1,45 +1,108 @@
-# ly-genealogy（屈氏宗谱）
+# 屈氏宗谱
 
-基于 Python3 的屈氏宗谱与文化平台，仅对外展示屈氏相关；**系统保留多姓氏接口**，可添加或切换其他姓氏族谱。采用 Flask+SQLite 架构，非前后端分离，部署简单、易二次开发。
+基于 Node.js 技术栈的屈氏宗谱数字化平台，包含公共前端（H5 移动端适配）、管理后台和 REST API。
 
-## 功能概览
+## 技术栈
 
-- **公开页面（无需登录）**：门户首页、族谱库列表、族谱详情（谱籍与字辈摘要）、屈氏文化。
-- **需登录后查看**：成员列表、世系树、成员查询与亲属关系、族谱/成员/字辈的新增与编辑。
-- **姓名脱敏**：成员、树形、查询结果中姓名仅显示前两字与后两字，中间以 * 代替。
-- **屈氏文化**：屈姓起源、郡望堂号、屈氏文化研究会（参考 [ly-web](https://github.com/quxiangshun/ly-web)）。
+| 模块 | 技术 | 说明 |
+|------|------|------|
+| API 后端 | Express + TypeScript | REST API、JWT 认证、文件上传 |
+| 数据库 | better-sqlite3 | 高性能同步 SQLite |
+| 公共前端 | Nuxt 3 + Vue 3 | SSR/SSG/ISR，SEO 友好，PWA |
+| 管理后台 | Vue 3 + Element Plus | SPA，独立构建 |
+| 包管理 | pnpm workspace | Monorepo |
 
-## 部署说明
+## 目录结构
 
-1. **环境**：Python 3.x，安装依赖：
-   ```bash
-   pip install -r requirements.txt
-   ```
-2. **启动**：在项目根目录执行
-   ```bash
-   python app.py
-   ```
-   访问 <http://127.0.0.1:5000/> 或 <http://服务器IP:5000/>
-3. **生产部署**：将 `config.py` 中 `DEBUG = False`，建议使用 Gunicorn：
-   ```bash
-   pip install gunicorn
-   gunicorn -w 4 -b 0.0.0.0:5000 app:app
-   ```
-4. **数据**：SQLite 数据库文件为项目根目录下 `genealogy.db`，首次运行自动创建。
+```
+├── packages/
+│   ├── server/          # Express API
+│   ├── web/             # Nuxt 3 公共前端
+│   └── admin/           # Vue Admin SPA
+├── docs/                # 族谱原始资料（PDF/DOC）
+├── ecosystem.config.cjs # PM2 配置
+├── Caddyfile            # Caddy 反向代理
+└── deploy.sh            # Ubuntu 部署脚本
+```
 
-5. **登录**：管理账号由环境变量 `ADMIN_USERNAME`、`ADMIN_PASSWORD` 控制，默认均为 `admin`。部署时请设置强密码，例如：`set ADMIN_PASSWORD=你的密码`（Windows）或 `export ADMIN_PASSWORD=你的密码`（Linux）。
+## 快速开始
 
-6. **公开族谱入库**：执行 `python -m scripts.seed_public_genealogies` 入库江苏常熟、湖北秭归、湖南溆浦、屈氏河东、**陕西渭南屈氏族谱（屈仲辉提供）** 等。重复执行不会重复插入同名族谱。
+### 安装依赖
 
-7. **根据 docs 完善屈氏信息与人员**：若已将《屈氏族谱（陕西渭南屈仲辉提供）.doc》等放入 `docs/`，可先提取文本再入库人员：
-   ```bash
-   python -m scripts.extract_doc_text   # 从 .doc 提取 txt（需 pip install olefile）
-   python -m scripts.import_from_docs    # 创建陕西渭南族谱并添加成员屈仲辉（资料提供者）
-   ```
-   屈氏文化页的「名人举例」「各地字辈摘录」已据 docs 内容整理，详见 `docs/README.md`。
+```bash
+pnpm install
+```
 
-8. **族谱网四本录入**：将 [zupu.cn](https://www.zupu.cn/) 上四本屈氏族谱的谱籍信息、字辈与始祖成员录入系统：
-   ```bash
-   python -m scripts.import_zupu_genealogies
-   ```
-   对应链接：215148 临海屈氏世谱、46475 敦睦堂屈氏宗谱、103834 雙峰屈氏五修宗譜、103835 湘鄉屈氏四修宗譜。脚本会创建或更新这四条族谱、为敦睦堂录入 24 字字辈、为各谱录入始祖成员。
+### 开发模式
+
+```bash
+# 终端 1: 启动 API
+pnpm dev:server
+
+# 终端 2: 启动 Nuxt 前端
+pnpm dev:web
+
+# 终端 3: 启动 Admin
+pnpm dev:admin
+```
+
+- API: http://localhost:5001
+- 前端: http://localhost:3000
+- 管理后台: http://localhost:3002/admin/
+
+### 种子数据
+
+```bash
+pnpm seed
+```
+
+### 从旧数据库迁移
+
+```bash
+pnpm migrate -- /path/to/old/genealogy.db
+```
+
+## 生产部署
+
+### 构建
+
+```bash
+pnpm build
+```
+
+### PM2 启动
+
+```bash
+# 编辑 ecosystem.config.cjs 中的 JWT_SECRET
+pm2 start ecosystem.config.cjs
+node packages/web/.output/server/index.mjs
+```
+
+### 默认管理员
+
+- 用户名: `ly-genealogy`
+- 密码: `123456`
+- 首次登录需要修改密码
+
+## API 端点
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| POST | /api/auth/login | 登录 |
+| POST | /api/auth/change-password | 修改密码 |
+| GET | /api/genealogies | 族谱列表 |
+| GET | /api/genealogies/:id | 族谱详情 |
+| GET | /api/generations/:id | 字辈列表 |
+| GET | /api/members | 成员列表 |
+| GET | /api/query/autocomplete | 成员搜索 |
+| POST | /api/culture/relationship | 亲缘查询 |
+| GET | /api/culture/zibei | 字辈搜索 |
+| GET | /api/wiki | 百科列表 |
+| GET | /api/wiki/:slug | 百科详情 |
+| GET | /api/news | 新闻列表 |
+| GET | /api/news/:slug | 新闻详情 |
+| GET | /api/stats | 统计数据 |
+
+## License
+
+见 [LICENSE](LICENSE) 文件。

@@ -27,10 +27,19 @@ def index():
     for code, _ in WIKI_CATEGORIES:
         cat_counts[code] = WikiEntry.query.filter_by(is_published=True, category=code).count()
 
+    hot_entries = WikiEntry.query.filter_by(is_published=True).order_by(
+        WikiEntry.view_count.desc()
+    ).limit(8).all()
+
+    total_views = db.session.query(db.func.sum(WikiEntry.view_count)).filter(
+        WikiEntry.is_published == True
+    ).scalar() or 0
+
     return render_template(
         'wiki_index.html',
         entries=entries, cat=cat, q=q,
         categories=WIKI_CATEGORIES, cat_counts=cat_counts,
+        hot_entries=hot_entries, total_views=total_views,
     )
 
 
@@ -38,6 +47,8 @@ def index():
 def detail(slug):
     """百科词条详情"""
     entry = WikiEntry.query.filter_by(slug=slug, is_published=True).first_or_404()
+    entry.view_count = (entry.view_count or 0) + 1
+    db.session.commit()
     related = WikiEntry.query.filter(
         WikiEntry.category == entry.category,
         WikiEntry.id != entry.id,

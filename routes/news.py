@@ -27,10 +27,19 @@ def index():
     for code, _ in NEWS_CATEGORIES:
         cat_counts[code] = NewsArticle.query.filter_by(is_published=True, category=code).count()
 
+    hot_articles = NewsArticle.query.filter_by(is_published=True).order_by(
+        NewsArticle.view_count.desc()
+    ).limit(5).all()
+
+    total_views = db.session.query(db.func.sum(NewsArticle.view_count)).filter(
+        NewsArticle.is_published == True
+    ).scalar() or 0
+
     return render_template(
         'news_index.html',
         articles=articles, cat=cat, q=q,
         categories=NEWS_CATEGORIES, cat_counts=cat_counts,
+        hot_articles=hot_articles, total_views=total_views,
     )
 
 
@@ -38,6 +47,8 @@ def index():
 def detail(slug):
     """新闻详情"""
     article = NewsArticle.query.filter_by(slug=slug, is_published=True).first_or_404()
+    article.view_count = (article.view_count or 0) + 1
+    db.session.commit()
     prev_art = NewsArticle.query.filter(
         NewsArticle.is_published == True,
         NewsArticle.create_time < article.create_time,

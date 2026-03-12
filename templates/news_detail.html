@@ -26,11 +26,12 @@
         <div class="wiki-article-meta">
             <span><i class="bi bi-clock me-1"></i>{{ article.create_time.strftime('%Y-%m-%d %H:%M') }}</span>
             {% if article.source %}<span><i class="bi bi-link-45deg me-1"></i>来源：{{ article.source }}</span>{% endif %}
+            <span><i class="bi bi-eye me-1"></i>{{ article.view_count or 0 }} 次浏览</span>
         </div>
     </header>
 
     <div class="wiki-article-body">
-        {{ article.content | safe }}
+        {{ article.content | md }}
     </div>
 
     {% if is_logged_in %}

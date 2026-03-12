@@ -102,6 +102,7 @@ def add():
                     member.photo = rel
                     db.session.commit()
 
+        FamilyMember.rebuild_paths(genealogy_id)
         flash('成员添加成功', 'success')
         return redirect(url_for('member.list_members', genealogy_id=genealogy_id))
     return render_template('member_form.html', title='新增成员', genealogies=genealogies, member=None, father_candidates=None, mother_candidates=None)
@@ -170,6 +171,7 @@ def edit(member_id):
                     member.photo = rel
 
         db.session.commit()
+        FamilyMember.rebuild_paths(member.genealogy_id)
         flash('成员信息已更新', 'success')
         return redirect(url_for('member.list_members', genealogy_id=member.genealogy_id))
 

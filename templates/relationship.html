@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+{% block title %}亲缘查询 - 屈氏宗谱{% endblock %}
+{% block meta_description %}输入两位宗亲姓名，查询他们之间的辈分关系——祖孙、堂兄弟、叔侄等。{% endblock %}
+{% block content %}
+
+<div class="text-center mb-4">
+    <p class="heritage-subtitle mb-3">血脉相连 · 亲缘溯查</p>
+    <h1 class="display-5 mb-2" style="letter-spacing:0.08em">亲缘查询</h1>
+    <p class="lead text-muted mb-0">输入两位宗亲姓名，查询他们之间的辈分关系</p>
+    <div class="heritage-divider"></div>
+</div>
+
+{# ===== 查询表单 ===== #}
+<div class="rel-search-box">
+    <form method="post" action="{{ url_for('culture.relationship') }}" id="relForm" autocomplete="off">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="row g-3 align-items-end justify-content-center mb-3">
+            <div class="col-md-4 col-12">
+                <label class="form-label"><i class="bi bi-book me-1"></i>选择族谱</label>
+                <select name="genealogy_id" id="relGenealogy" class="form-select form-select-lg" required>
+                    <option value="">请选择族谱…</option>
+                    {% for g in genealogies %}
+                    <option value="{{ g.id }}" {% if form.genealogy_id == g.id %}selected{% endif %}>
+                        {{ g.genealogy_name }}{% if g.region %}（{{ g.region }}）{% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="row g-3 align-items-end justify-content-center">
+            <div class="col-md-3 col-5">
+                <label class="form-label"><i class="bi bi-person me-1"></i>第一人</label>
+                <div class="position-relative">
+                    <input type="text" name="name_a" id="nameA" class="form-control form-control-lg"
+                           value="{{ form.name_a }}" placeholder="输入姓名" required>
+                    <input type="hidden" name="id_a" id="idA" value="{{ form.id_a or '' }}">
+                    <div class="rel-autocomplete" id="acA"></div>
+                </div>
+            </div>
+            <div class="col-auto text-center d-flex align-items-end pb-2">
+                <span class="rel-vs"><i class="bi bi-arrow-left-right"></i></span>
+            </div>
+            <div class="col-md-3 col-5">
+                <label class="form-label"><i class="bi bi-person me-1"></i>第二人</label>
+                <div class="position-relative">
+                    <input type="text" name="name_b" id="nameB" class="form-control form-control-lg"
+                           value="{{ form.name_b }}" placeholder="输入姓名" required>
+                    <input type="hidden" name="id_b" id="idB" value="{{ form.id_b or '' }}">
+                    <div class="rel-autocomplete" id="acB"></div>
+                </div>
+            </div>
+            <div class="col-md-auto col-12 text-center">
+                <button type="submit" class="btn btn-primary btn-lg px-4"><i class="bi bi-search me-1"></i>查 询</button>
+            </div>
+        </div>
+        <p class="form-text text-center mt-2">提示：请先选择族谱，输入姓名时会自动提示匹配的成员</p>
+    </form>
+</div>
+
+{# ===== 结果 ===== #}
+{% if result %}
+<div class="heritage-section-divider"><span>查询结果</span></div>
+
+{% if result.error %}
+<div class="text-center py-4">
+    <i class="bi bi-emoji-neutral" style="font-size:2.5rem;color:var(--heritage-ink-muted)"></i>
+    <p class="mt-2 text-muted">{{ result.error }}</p>
+</div>
+
+{% elif result.disambiguate %}
+<div class="rel-disambiguate card heritage-card p-4">
+    <p class="mb-3"><i class="bi bi-exclamation-triangle me-1 text-warning"></i>存在同名成员，请选择确切人员后重新查询：</p>
+    <form method="post" action="{{ url_for('culture.relationship') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="genealogy_id" value="{{ form.genealogy_id }}">
+        <input type="hidden" name="name_a" value="{{ form.name_a }}">
+        <input type="hidden" name="name_b" value="{{ form.name_b }}">
+        <div class="row g-3">
+            {% if result.members_a %}
+            <div class="col-md-6">
+                <label class="form-label fw-bold">「{{ form.name_a }}」匹配到多人：</label>
+                {% for m in result.members_a %}
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="id_a" value="{{ m.id }}" id="da{{ m.id }}" {% if loop.first %}checked{% endif %}>
+                    <label class="form-check-label" for="da{{ m.id }}">
+                        {{ m.name }}
+                        <span class="text-muted small">
+                            （第{{ m.generation_number or '?' }}世
+                            {% if m.father %}，父：{{ m.father.name }}{% endif %}
+                            {% if m.birth_date %}，生：{{ m.birth_date }}{% endif %}）
+                        </span>
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <input type="hidden" name="id_a" value="{{ result.selected_a.id if result.selected_a else '' }}">
+            {% endif %}
+            {% if result.members_b %}
+            <div class="col-md-6">
+                <label class="form-label fw-bold">「{{ form.name_b }}」匹配到多人：</label>
+                {% for m in result.members_b %}
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="id_b" value="{{ m.id }}" id="db{{ m.id }}" {% if loop.first %}checked{% endif %}>
+                    <label class="form-check-label" for="db{{ m.id }}">
+                        {{ m.name }}
+                        <span class="text-muted small">
+                            （第{{ m.generation_number or '?' }}世
+                            {% if m.father %}，父：{{ m.father.name }}{% endif %}
+                            {% if m.birth_date %}，生：{{ m.birth_date }}{% endif %}）
+                        </span>
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <input type="hidden" name="id_b" value="{{ result.selected_b.id if result.selected_b else '' }}">
+            {% endif %}
+        </div>
+        <div class="text-center mt-3">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-search me-1"></i>确认查询</button>
+        </div>
+    </form>
+</div>
+
+{% elif result.relation %}
+<div class="rel-result card heritage-card">
+    <div class="card-body text-center py-4">
+        <div class="rel-result-label">
+            <i class="bi bi-people-fill me-2"></i>{{ result.relation }}
+        </div>
+
+        {% if result.chain_a or result.chain_b %}
+        <div class="rel-path-visual mt-4">
+            <div class="rel-path-title mb-3"><i class="bi bi-diagram-3 me-1"></i>传承路径</div>
+            <div class="rel-chain">
+                {# 从 A 向上到 LCA #}
+                {% if result.chain_a %}
+                {% for m in result.chain_a|reverse %}
+                <div class="rel-node {% if loop.last %}rel-node-self{% elif loop.first %}rel-node-lca{% endif %}">
+                    <span class="rel-node-name">{{ m.name }}</span>
+                    {% if m.generation_number %}<span class="rel-node-gen">第{{ m.generation_number }}世</span>{% endif %}
+                </div>
+                {% if not loop.last %}<div class="rel-arrow"><i class="bi bi-arrow-down"></i></div>{% endif %}
+                {% endfor %}
+                {% endif %}
+
+                {# 从 LCA 向下到 B #}
+                {% if result.chain_b %}
+                {% for m in result.chain_b %}
+                <div class="rel-arrow"><i class="bi bi-arrow-down"></i></div>
+                <div class="rel-node {% if loop.last %}rel-node-self{% endif %}">
+                    <span class="rel-node-name">{{ m.name }}</span>
+                    {% if m.generation_number %}<span class="rel-node-gen">第{{ m.generation_number }}世</span>{% endif %}
+                </div>
+                {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if result.lca %}
+        <p class="text-muted mt-3 mb-0">
+            <i class="bi bi-person-check me-1"></i>共同祖先：<strong>{{ result.lca.name }}</strong>
+            {% if result.lca.generation_number %}（第{{ result.lca.generation_number }}世）{% endif %}
+            &nbsp;|&nbsp; 相隔 <strong>{{ result.up_a + result.up_b }}</strong> 代
+        </p>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function(){
+    var gSel = document.getElementById('relGenealogy');
+    var nameA = document.getElementById('nameA');
+    var nameB = document.getElementById('nameB');
+    var idA = document.getElementById('idA');
+    var idB = document.getElementById('idB');
+    var acA = document.getElementById('acA');
+    var acB = document.getElementById('acB');
+    var timer = null;
+
+    function setupAC(input, hidden, dropdown) {
+        var cache = {};
+        input.addEventListener('input', function(){
+            hidden.value = '';
+            var gid = gSel.value;
+            var q = input.value.trim();
+            if (!gid || q.length < 1) { dropdown.innerHTML = ''; dropdown.style.display = 'none'; return; }
+            clearTimeout(timer);
+            timer = setTimeout(function(){
+                var key = gid + ':' + q;
+                if (cache[key]) { render(cache[key], dropdown, input, hidden); return; }
+                fetch('{{ url_for("culture.api_members") }}?genealogy_id=' + gid + '&q=' + encodeURIComponent(q))
+                    .then(function(r){ return r.json(); })
+                    .then(function(data){ cache[key] = data; render(data, dropdown, input, hidden); });
+            }, 250);
+        });
+        input.addEventListener('focus', function(){ if(dropdown.children.length) dropdown.style.display = 'block'; });
+        document.addEventListener('click', function(e){
+            if(!dropdown.contains(e.target) && e.target !== input) dropdown.style.display = 'none';
+        });
+    }
+
+    function render(items, dropdown, input, hidden) {
+        dropdown.innerHTML = '';
+        if (!items.length) { dropdown.style.display = 'none'; return; }
+        items.forEach(function(m){
+            var div = document.createElement('div');
+            div.className = 'rel-ac-item';
+            div.textContent = m.display || m.name;
+            if (!m.display && m.generation) {
+                div.textContent = m.name + '（第' + m.generation + '世' + (m.father ? '，父：' + m.father : '') + '）';
+            }
+            div.addEventListener('mousedown', function(e){
+                e.preventDefault();
+                input.value = m.name;
+                hidden.value = m.id;
+                dropdown.style.display = 'none';
+            });
+            dropdown.appendChild(div);
+        });
+        dropdown.style.display = 'block';
+    }
+
+    setupAC(nameA, idA, acA);
+    setupAC(nameB, idB, acB);
+
+    gSel.addEventListener('change', function(){
+        nameA.value = ''; nameB.value = '';
+        idA.value = ''; idB.value = '';
+        acA.innerHTML = ''; acB.innerHTML = '';
+        acA.style.display = 'none'; acB.style.display = 'none';
+    });
+})();
+</script>
+{% endblock %}

@@ -53,6 +53,11 @@
                                 </a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link {% if request.endpoint == 'culture.relationship' %}active{% endif %}" href="{{ url_for('culture.relationship') }}">
+                                    <i class="bi bi-people me-1"></i>亲缘查询
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link {% if request.endpoint == 'culture.index' %}active{% endif %}" href="{{ url_for('culture.index') }}">
                                     <i class="bi bi-bank me-1"></i>屈氏文化
                                 </a>
@@ -153,6 +158,7 @@
                 <div class="footer-links">
                     <a href="{{ url_for('genealogy.list_genealogies') }}">族谱库</a>
                     <a href="{{ url_for('culture.zibei') }}">字辈查询</a>
+                    <a href="{{ url_for('culture.relationship') }}">亲缘查询</a>
                     <a href="{{ url_for('culture.index') }}">屈氏文化</a>
                     <a href="{{ url_for('wiki.index') }}">百科</a>
                     <a href="{{ url_for('news.index') }}">动态</a>

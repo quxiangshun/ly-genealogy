@@ -56,6 +56,18 @@ def mask_name_filter(name):
     return mask_name(name)
 
 
+import markdown as _md
+from markupsafe import Markup
+
+@app.template_filter("md")
+def markdown_filter(text):
+    """将 Markdown 文本转换为 HTML"""
+    if not text:
+        return ''
+    html = _md.markdown(text, extensions=['tables', 'fenced_code', 'nl2br', 'toc'])
+    return Markup(html)
+
+
 app.register_blueprint(genealogy.bp)
 app.register_blueprint(member.bp)
 app.register_blueprint(query.bp)
@@ -84,7 +96,7 @@ def login():
             session.pop("must_change_password", None)
             next_url = request.args.get("next") or url_for("index")
             return redirect(next_url)
-        flash("用户名或密码错误", "danger")
+        return render_template("login.html", error="用户名或密码错误")
     return render_template("login.html")
 
 
@@ -144,6 +156,7 @@ def sitemap_xml():
         base + url_for("culture.index"),
         base + url_for("culture.zibei"),
         base + url_for("culture.contact"),
+        base + url_for("culture.relationship"),
         base + url_for("wiki.index"),
         base + url_for("news.index"),
     ]
@@ -195,6 +208,36 @@ def index():
 
 with app.app_context():
     db.create_all()
+
+    # SQLite: 检测并添加新列（已有数据库平滑迁移）
+    from sqlalchemy import inspect as sa_inspect, text
+    insp = sa_inspect(db.engine)
+
+    _migrate_map = {
+        'family_member': [('path', 'VARCHAR(2000)')],
+        'wiki_entry': [('view_count', 'INTEGER DEFAULT 0')],
+        'news_article': [('view_count', 'INTEGER DEFAULT 0')],
+    }
+    for table, columns in _migrate_map.items():
+        try:
+            existing = [c['name'] for c in insp.get_columns(table)]
+        except Exception:
+            continue
+        for col_name, col_type in columns:
+            if col_name not in existing:
+                db.session.execute(text(f'ALTER TABLE {table} ADD COLUMN {col_name} {col_type}'))
+    db.session.commit()
+
+    # 为缺少 path 的成员自动重建
+    from models import FamilyMember
+    need_rebuild = FamilyMember.query.filter(
+        (FamilyMember.path == None) | (FamilyMember.path == '')
+    ).first()
+    if need_rebuild:
+        gids = db.session.query(FamilyMember.genealogy_id).distinct().all()
+        for (gid,) in gids:
+            FamilyMember.rebuild_paths(gid)
+
     if not AdminUser.query.first():
         default_admin = AdminUser(username=ADMIN_USERNAME, must_change_password=True)
         default_admin.set_password(ADMIN_PASSWORD)

@@ -27,11 +27,12 @@
             {% if entry.update_time and entry.update_time != entry.create_time %}
             <span><i class="bi bi-pencil me-1"></i>更新于 {{ entry.update_time.strftime('%Y-%m-%d') }}</span>
             {% endif %}
+            <span><i class="bi bi-eye me-1"></i>{{ entry.view_count or 0 }} 次浏览</span>
         </div>
     </header>
 
     <div class="wiki-article-body">
-        {{ entry.content | safe }}
+        {{ entry.content | md }}
     </div>
 
     {% if is_logged_in %}

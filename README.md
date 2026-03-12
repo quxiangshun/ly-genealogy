@@ -71,27 +71,35 @@ pnpm dev:admin
 
 ## 生产部署
 
-### 一键部署
+### 第一步：本地构建打包
 
 ```bash
-# 在源码目录执行（自动构建 + 部署到 /var/www/genealogy/）
+# 在项目根目录执行
+bash build.sh
+```
+
+生成 `genealogy-release.tar.gz`，包含 server/admin/web 三个目录的构建产物。
+
+### 第二步：上传到服务器
+
+```bash
+scp genealogy-release.tar.gz root@39.106.39.125:/tmp/
+```
+
+### 第三步：服务器解压部署
+
+```bash
+mkdir -p /var/www/genealogy && cd /var/www/genealogy
+tar -xzf /tmp/genealogy-release.tar.gz
 bash deploy.sh
 ```
 
-脚本会自动：构建三个项目 → 复制到 `/var/www/genealogy/{server,admin,web}` → 安装 server 生产依赖 → PM2 启动
+`deploy.sh` 会自动：安装 server 运行时依赖 → 生成 JWT_SECRET → PM2 启动。
 
-### 手动部署
+### 启动 Caddy
 
 ```bash
-# 1. 构建
-pnpm build
-
-# 2. 启动 PM2（在部署目录）
-cd /var/www/genealogy
-pm2 start ecosystem.config.cjs
-
-# 3. 启动 Caddy（监听 9997 端口）
-caddy start --config Caddyfile
+caddy start --config /var/www/genealogy/Caddyfile
 ```
 
 ### 服务架构

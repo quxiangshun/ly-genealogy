@@ -5,6 +5,8 @@ node_modules/
 .output/
 .nuxt/
 dist/
+.deploy/
+genealogy-release.tar.gz
 
 # Database
 *.db

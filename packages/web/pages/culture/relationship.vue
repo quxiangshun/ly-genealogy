@@ -114,7 +114,7 @@
               class="form-check-input"
             />
             <label class="form-check-label">
-              {{ m.name }}（第{{ m.generation_number || '?' }}世）
+              {{ m.name }}<template v-if="m.former_name">（曾用名：{{ m.former_name }}）</template>（第{{ m.generation_number || '?' }}世）
             </label>
           </div>
         </div>
@@ -129,7 +129,7 @@
               class="form-check-input"
             />
             <label class="form-check-label">
-              {{ m.name }}（第{{ m.generation_number || '?' }}世）
+              {{ m.name }}<template v-if="m.former_name">（曾用名：{{ m.former_name }}）</template>（第{{ m.generation_number || '?' }}世）
             </label>
           </div>
         </div>
@@ -213,8 +213,8 @@ interface RelResult {
   chain_a?: { id: number; name: string; generation_number?: number }[]
   chain_b?: { id: number; name: string; generation_number?: number }[]
   disambiguate?: boolean
-  members_a?: { id: number; name: string; generation_number?: number }[]
-  members_b?: { id: number; name: string; generation_number?: number }[]
+  members_a?: { id: number; name: string; former_name?: string; generation_number?: number }[]
+  members_b?: { id: number; name: string; former_name?: string; generation_number?: number }[]
   error?: string
 }
 

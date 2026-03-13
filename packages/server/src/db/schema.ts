@@ -38,6 +38,7 @@ export function initSchema(db: Database.Database): void {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       genealogy_id INTEGER NOT NULL REFERENCES genealogy_main(id) ON DELETE CASCADE,
       name TEXT NOT NULL,
+      former_name TEXT,
       gender TEXT NOT NULL DEFAULT 'M',
       generation_number INTEGER,
       courtesy_name TEXT,
@@ -85,4 +86,10 @@ export function initSchema(db: Database.Database): void {
       update_time TEXT DEFAULT (datetime('now','localtime'))
     );
   `);
+
+  const cols = db.prepare("PRAGMA table_info(family_member)").all() as { name: string }[];
+  const colNames = new Set(cols.map(c => c.name));
+  if (!colNames.has('former_name')) {
+    db.exec("ALTER TABLE family_member ADD COLUMN former_name TEXT");
+  }
 }

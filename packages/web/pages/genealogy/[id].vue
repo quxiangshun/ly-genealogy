@@ -15,7 +15,7 @@
         <div>
           <h2 class="mb-1">{{ genealogy.genealogy_name }}</h2>
           <div class="d-flex flex-wrap gap-2 align-items-center">
-            <span class="badge" style="background:rgba(176,138,80,0.15);color:var(--heritage-accent);font-size:0.85rem">{{ genealogy.surname }}氏</span>
+            <span class="badge" style="background:rgba(156,118,56,0.15);color:var(--heritage-accent);font-size:0.85rem">{{ genealogy.surname }}氏</span>
             <span v-if="genealogy.hall_name" class="badge" style="background:rgba(92,107,74,0.12);color:#4a5c3a;font-size:0.85rem">{{ genealogy.hall_name }}</span>
             <span v-if="genealogy.region" class="text-muted small"><i class="bi bi-geo-alt me-1"></i>{{ genealogy.region }}</span>
           </div>

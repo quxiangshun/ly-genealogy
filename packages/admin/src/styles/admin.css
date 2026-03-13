@@ -1,48 +1,125 @@
+/* =====================================================
+   屈氏宗谱管理后台 — 古朴 · 宣纸墨韵
+   ===================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=ZCOOL+XiaoWei&display=swap');
+
 :root {
-  --admin-sidebar-bg: #1a1a2e;
-  --admin-sidebar-text: #eaeaea;
-  --admin-sidebar-active: #c9a227;
-  --admin-header-bg: #fff;
+  --admin-bg: #ddd4c0;
+  --admin-paper: #f0e8d8;
+  --admin-ink: #1c1708;
+  --admin-ink-muted: #5c5240;
+  --admin-accent: #6b3a10;
+  --admin-gold: #9c7638;
+  --admin-gold-bright: #d4b06a;
+  --admin-red: #7a2e22;
+  --admin-nav-bg: #231808;
+  --admin-border: #b8a88a;
+  --font-serif: 'Noto Serif SC', 'SimSun', 'Songti SC', serif;
+  --font-title: 'ZCOOL XiaoWei', 'Noto Serif SC', serif;
 }
 
-html,
-body {
+html, body {
   margin: 0;
   padding: 0;
-  font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB',
-    'Microsoft YaHei', Arial, sans-serif;
+  font-family: var(--font-serif);
+  background: var(--admin-bg);
+  color: var(--admin-ink);
 }
 
 #app {
   min-height: 100vh;
 }
 
-/* Sidebar dark theme - heritage style */
-.admin-aside .el-menu {
-  --el-menu-bg-color: var(--admin-sidebar-bg);
-  --el-menu-text-color: var(--admin-sidebar-text);
-  --el-menu-active-color: var(--admin-sidebar-active);
+/* Element Plus 全局覆盖 */
+.el-card {
+  --el-card-bg-color: var(--admin-paper);
+  border-color: var(--admin-border);
+  box-shadow: 0 1px 4px rgba(28,23,8,0.08);
+}
+.el-card__header {
+  font-family: var(--font-title);
+  font-weight: 600;
+  color: var(--admin-accent);
+  border-bottom-color: var(--admin-border);
+  background: linear-gradient(135deg, rgba(156,118,56,0.08), rgba(186,168,138,0.12));
 }
 
-.admin-aside .el-menu-item:hover {
-  background-color: rgba(201, 162, 39, 0.15) !important;
+.el-button--primary {
+  --el-button-bg-color: var(--admin-accent);
+  --el-button-border-color: var(--admin-accent);
+  --el-button-hover-bg-color: #7a4a18;
+  --el-button-hover-border-color: #7a4a18;
+  --el-button-active-bg-color: #5a3010;
+  --el-button-active-border-color: #5a3010;
 }
 
-.admin-aside .el-menu-item.is-active {
-  background-color: rgba(201, 162, 39, 0.2) !important;
+.el-table {
+  --el-table-bg-color: var(--admin-paper);
+  --el-table-tr-bg-color: var(--admin-paper);
+  --el-table-header-bg-color: rgba(156,118,56,0.1);
+  --el-table-row-hover-bg-color: rgba(156,118,56,0.06);
+  --el-table-border-color: var(--admin-border);
+  --el-table-text-color: var(--admin-ink);
+  --el-table-header-text-color: var(--admin-accent);
+  color: var(--admin-ink);
+}
+.el-table th.el-table__cell {
+  font-family: var(--font-title);
+  font-weight: 600;
+}
+.el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell {
+  background: rgba(240,232,216,0.5);
 }
 
-/* Responsive */
+.el-input__wrapper,
+.el-select .el-input__wrapper,
+.el-textarea__inner {
+  background-color: #f5ede0 !important;
+  border-color: var(--admin-border) !important;
+  box-shadow: none !important;
+}
+.el-input__wrapper:focus-within,
+.el-textarea__inner:focus {
+  border-color: var(--admin-accent) !important;
+  box-shadow: 0 0 0 1px rgba(107,58,16,0.15) !important;
+}
+
+.el-form-item__label {
+  font-family: var(--font-title);
+  color: var(--admin-ink);
+}
+
+.el-menu--horizontal > .el-menu-item.is-active {
+  border-bottom-color: var(--admin-gold-bright) !important;
+}
+
+.el-dropdown-menu {
+  background: var(--admin-paper) !important;
+  border-color: var(--admin-border) !important;
+}
+.el-dropdown-menu__item:hover {
+  background: rgba(156,118,56,0.1) !important;
+  color: var(--admin-accent) !important;
+}
+
+.el-message-box {
+  --el-messagebox-title-color: var(--admin-ink);
+}
+
+.el-pagination {
+  --el-pagination-button-bg-color: var(--admin-paper);
+  --el-pagination-hover-color: var(--admin-accent);
+}
+
+/* 响应式 */
 @media (max-width: 768px) {
   .admin-aside {
     width: 64px !important;
   }
-
   .logo {
     font-size: 14px;
     padding: 0 8px;
   }
-
   .admin-main {
     padding: 12px;
   }

@@ -12,6 +12,7 @@
     <el-table :data="list" v-loading="loading" stripe>
       <el-table-column prop="id" label="ID" width="80" />
       <el-table-column prop="name" label="姓名" width="120" />
+      <el-table-column prop="former_name" label="曾用名" width="120" />
       <el-table-column prop="gender" label="性别" width="80">
         <template #default="{ row }">{{ row.gender === 'F' ? '女' : '男' }}</template>
       </el-table-column>

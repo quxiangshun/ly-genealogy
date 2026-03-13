@@ -9,6 +9,9 @@
       <el-form-item label="姓名" required>
         <el-input v-model="form.name" placeholder="姓名" />
       </el-form-item>
+      <el-form-item label="曾用名">
+        <el-input v-model="form.former_name" placeholder="曾用名（选填）" />
+      </el-form-item>
       <el-form-item label="性别">
         <el-select v-model="form.gender" placeholder="性别" style="width: 120px">
           <el-option label="男" value="M" />
@@ -129,6 +132,7 @@ interface AutocompleteItem {
 const form = reactive({
   genealogy_id: null as number | null,
   name: '',
+  former_name: '',
   gender: 'M' as 'M' | 'F',
   generation_number: null as number | null,
   courtesy_name: '',
@@ -203,6 +207,7 @@ async function fetchData() {
     if (d) {
       form.genealogy_id = Number(d.genealogy_id)
       form.name = String(d.name ?? '')
+      form.former_name = String(d.former_name ?? '')
       form.gender = (d.gender === 'F' ? 'F' : 'M') as 'M' | 'F'
       form.generation_number = d.generation_number != null ? Number(d.generation_number) : null
       form.courtesy_name = String(d.courtesy_name ?? '')
@@ -237,6 +242,7 @@ async function submit() {
   try {
     const payload = {
       name: form.name,
+      former_name: form.former_name || null,
       gender: form.gender,
       generation_number: form.generation_number,
       courtesy_name: form.courtesy_name || null,

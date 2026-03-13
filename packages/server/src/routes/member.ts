@@ -106,6 +106,7 @@ router.post('/', authRequired, (req: Request, res: Response) => {
     const {
       genealogy_id,
       name,
+      former_name,
       gender,
       generation_number,
       courtesy_name,
@@ -139,15 +140,16 @@ router.post('/', authRequired, (req: Request, res: Response) => {
 
     const stmt = db.prepare(`
       INSERT INTO family_member (
-        genealogy_id, name, gender, generation_number, courtesy_name,
+        genealogy_id, name, former_name, gender, generation_number, courtesy_name,
         birth_date, death_date, birth_place, father_id, mother_id,
         spouse_name, photo, notes
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const result = stmt.run(
       gid,
       name,
+      former_name ?? null,
       gender ?? 'M',
       generation_number ?? null,
       courtesy_name ?? null,
@@ -182,6 +184,7 @@ router.put('/:id', authRequired, (req: Request, res: Response) => {
     const body = req.body ?? {};
     const {
       name,
+      former_name,
       gender,
       generation_number,
       courtesy_name,
@@ -205,6 +208,7 @@ router.put('/:id', authRequired, (req: Request, res: Response) => {
     db.prepare(`
       UPDATE family_member SET
         name = COALESCE(?, name),
+        former_name = ?,
         gender = COALESCE(?, gender),
         generation_number = ?,
         courtesy_name = ?,
@@ -219,6 +223,7 @@ router.put('/:id', authRequired, (req: Request, res: Response) => {
       WHERE id = ?
     `).run(
       name ?? undefined,
+      former_name ?? null,
       gender ?? undefined,
       generation_number ?? null,
       courtesy_name ?? null,

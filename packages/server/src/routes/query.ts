@@ -83,12 +83,12 @@ router.get('/autocomplete', (req: Request, res: Response) => {
 
     const db = getDb();
     const members = db.prepare(`
-      SELECT m.id, m.name, m.generation_number, m.father_id
+      SELECT m.id, m.name, m.former_name, m.generation_number, m.father_id
       FROM family_member m
-      WHERE m.genealogy_id = ? AND m.name LIKE ?
+      WHERE m.genealogy_id = ? AND (m.name LIKE ? OR m.former_name LIKE ?)
       ORDER BY m.generation_number ASC, m.id ASC
       LIMIT 20
-    `).all(gid, `%${q}%`) as { id: number; name: string; generation_number: number | null; father_id: number | null }[];
+    `).all(gid, `%${q}%`, `%${q}%`) as { id: number; name: string; former_name: string | null; generation_number: number | null; father_id: number | null }[];
 
     const seen: Record<string, { id: number; name: string; generation: number | null; father: string; display?: string }[]> = {};
     for (const m of members) {

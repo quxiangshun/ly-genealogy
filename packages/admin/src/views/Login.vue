@@ -95,11 +95,17 @@ async function handleLogin() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(156,118,56,0.12) 0%, transparent 55%),
+    radial-gradient(ellipse at 70% 80%, rgba(122,46,34,0.08) 0%, transparent 45%),
+    linear-gradient(135deg, #231808 0%, #2c1e0e 40%, #1c1708 100%);
 }
 
 .login-card {
   width: 400px;
+  --el-card-bg-color: var(--admin-paper);
+  border-color: var(--admin-border);
+  box-shadow: 0 8px 40px rgba(28,23,8,0.4);
 }
 
 .card-header {
@@ -107,12 +113,16 @@ async function handleLogin() {
 }
 
 .logo-text {
-  font-size: 22px;
-  font-weight: 600;
-  color: #c9a227;
+  font-family: var(--font-title);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--admin-gold-bright);
+  letter-spacing: 0.15em;
 }
 
 .login-btn {
   width: 100%;
+  --el-button-bg-color: var(--admin-accent);
+  --el-button-border-color: var(--admin-accent);
 }
 </style>

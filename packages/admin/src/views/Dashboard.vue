@@ -149,6 +149,7 @@ onMounted(async () => {
 
 .stat-card {
   margin-bottom: 20px;
+  border-left: 3px solid var(--admin-gold);
 }
 
 .stat-content {
@@ -158,14 +159,16 @@ onMounted(async () => {
 }
 
 .stat-value {
+  font-family: var(--font-title);
   font-size: 28px;
-  font-weight: 600;
-  color: #1a1a2e;
+  font-weight: 700;
+  color: var(--admin-accent);
 }
 
 .stat-label {
+  font-family: var(--font-title);
   font-size: 14px;
-  color: #909399;
+  color: var(--admin-ink-muted);
 }
 
 .content-row {

@@ -9,8 +9,8 @@
           mode="horizontal"
           class="admin-menu"
           background-color="transparent"
-          text-color="#d8ccb8"
-          active-text-color="#c9a227"
+          text-color="#e8dcc8"
+          active-text-color="#d4b06a"
           @select="handleMenuSelect"
         >
           <el-menu-item index="dashboard">
@@ -97,20 +97,20 @@ function handleCommand(cmd: string) {
 <style scoped>
 .admin-layout {
   min-height: 100vh;
-  background-color: #f5f7fa;
+  background-color: var(--admin-bg);
 }
 
 .admin-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(26, 26, 46, 0.72);
+  background: linear-gradient(180deg, rgba(35,24,8,0.92) 0%, rgba(50,36,18,0.88) 100%);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
   padding: 0 20px;
   height: 56px;
-  box-shadow: 0 1px 12px rgba(0, 0, 0, 0.25), inset 0 -1px 0 rgba(255, 255, 255, 0.06);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 2px 16px rgba(28,23,8,0.3);
+  border-bottom: 1px solid rgba(156,118,56,0.25);
   z-index: 100;
   position: sticky;
   top: 0;
@@ -124,13 +124,15 @@ function handleCommand(cmd: string) {
 }
 
 .logo {
+  font-family: var(--font-title);
   font-size: 17px;
   font-weight: 700;
-  color: #c9a227;
+  color: var(--admin-gold-bright);
   white-space: nowrap;
   margin-right: 24px;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   cursor: pointer;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
 .admin-menu {
@@ -147,12 +149,12 @@ function handleCommand(cmd: string) {
 }
 
 .admin-menu :deep(.el-menu-item:hover) {
-  background-color: rgba(255, 255, 255, 0.06) !important;
+  background-color: rgba(156,118,56,0.12) !important;
 }
 
 .admin-menu :deep(.el-menu-item.is-active) {
-  border-bottom-color: #c9a227;
-  background-color: rgba(201, 162, 39, 0.08) !important;
+  border-bottom-color: var(--admin-gold-bright);
+  background-color: rgba(156,118,56,0.1) !important;
 }
 
 .header-right {
@@ -164,7 +166,7 @@ function handleCommand(cmd: string) {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #d8ccb8;
+  color: #e8dcc8;
   font-size: 14px;
   cursor: pointer;
   transition: color 0.2s;
@@ -173,8 +175,8 @@ function handleCommand(cmd: string) {
 }
 
 .username-trigger:hover {
-  color: #c9a227;
-  background: rgba(255, 255, 255, 0.06);
+  color: var(--admin-gold-bright);
+  background: rgba(156,118,56,0.12);
 }
 
 .admin-main {
@@ -184,7 +186,7 @@ function handleCommand(cmd: string) {
 }
 
 .pwd-lock-hint {
-  color: #e6a23c;
+  color: var(--admin-gold-bright);
   font-size: 13px;
   letter-spacing: 0.04em;
 }

@@ -1,4 +1,5 @@
 import type Database from 'better-sqlite3';
+import { runMigrations } from './migrations.js';
 
 export function initSchema(db: Database.Database): void {
   db.exec(`
@@ -87,9 +88,5 @@ export function initSchema(db: Database.Database): void {
     );
   `);
 
-  const cols = db.prepare("PRAGMA table_info(family_member)").all() as { name: string }[];
-  const colNames = new Set(cols.map(c => c.name));
-  if (!colNames.has('former_name')) {
-    db.exec("ALTER TABLE family_member ADD COLUMN former_name TEXT");
-  }
+  runMigrations(db);
 }

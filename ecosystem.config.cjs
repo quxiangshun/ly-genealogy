@@ -5,7 +5,6 @@ module.exports = {
     {
       name: 'ly-genealogy-api',
       script: `${DEPLOY_DIR}/server/dist/index.js`,
-      interpreter: 'none',
       env: {
         NODE_ENV: 'production',
         PORT: '5001',
@@ -25,7 +24,6 @@ module.exports = {
     {
       name: 'ly-genealogy-web',
       script: `${DEPLOY_DIR}/web/.output/server/index.mjs`,
-      interpreter: 'none',
       env: {
         NODE_ENV: 'production',
         PORT: '3000',

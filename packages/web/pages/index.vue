@@ -197,10 +197,10 @@
                 <span v-if="g.hall_name" class="genealogy-hall-badge">{{ g.hall_name }}</span>
               </div>
               <div class="d-flex flex-wrap gap-2 mb-2">
-                <span v-if="g.region" class="badge" style="background:rgba(176,138,80,0.15);color:var(--heritage-accent)">
+                <span v-if="g.region" class="badge" style="background:rgba(156,118,56,0.15);color:var(--heritage-accent)">
                   <i class="bi bi-geo-alt me-1"></i>{{ g.region }}
                 </span>
-                <span v-if="g.period" class="badge" style="background:rgba(139,58,46,0.1);color:var(--heritage-red)">
+                <span v-if="g.period" class="badge" style="background:rgba(122,46,34,0.1);color:var(--heritage-red)">
                   <i class="bi bi-clock-history me-1"></i>{{ g.period }}
                 </span>
               </div>

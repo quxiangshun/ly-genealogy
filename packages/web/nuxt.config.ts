@@ -57,8 +57,8 @@ export default defineNuxtConfig({
   },
   nitro: {
     devProxy: {
-      '/api': { target: 'http://localhost:5001', changeOrigin: true },
-      '/uploads': { target: 'http://localhost:5001', changeOrigin: true },
+      '/api': { target: 'http://localhost:5001/api', changeOrigin: true },
+      '/uploads': { target: 'http://localhost:5001/uploads', changeOrigin: true },
     },
   },
   devtools: { enabled: false },
